@@ -1,0 +1,33 @@
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+  <j:set var="helpURL" value="/plugin/urbandeploypublisher"/>
+
+  <f:section title="UrbanDeploy Server">
+    <f:entry title="">
+      <f:repeatable var="site" items="${descriptor.sites}">
+        <table width="100%">
+          <f:entry title="Profile Name" help="${helpURL}/help-profile.html">
+            <f:textbox name="ud.profileName" value="${site.profileName}"/>
+          </f:entry>
+          <f:entry title="UrbanDeploy URL" help="${helpURL}/help-url.html">
+            <f:textbox name="ud.url" value="${site.url}"/>
+          </f:entry>
+
+          <f:entry title="User Name" help="${helpURL}/help-user.html">
+            <f:textbox name="ud.user" value="${site.user}"/>
+          </f:entry>
+          <f:entry title="Password" help="${helpURL}/help-password.html">
+            <f:password name="ud.password" value="${site.password}"/>
+          </f:entry>
+          <f:entry title="">
+            <div style="text-align: right">
+              <f:repeatableDeleteButton/>
+              <f:validateButton
+                  title="${%Test Connection}" progress="${%Testing...}"
+                  method="testConnection" with="ud.url,ud.user,ud.password"/>
+            </div>
+          </f:entry>
+        </table>
+      </f:repeatable>
+    </f:entry>
+  </f:section>
+</j:jelly>

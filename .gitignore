@@ -14,3 +14,7 @@
 /dist
 /lib
 /ecbin
+
+*.iml
+*.ipr
+*.iws

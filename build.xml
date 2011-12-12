@@ -30,42 +30,22 @@
     <property name="ahp.project.name" value="${project}"/>
     <property name="ahp.workflow.name" value="build workflow [${ahp.branch.name}]"/>
 
+    <property name="MAVEN_HOME" value="${env.MAVEN_HOME}"/>
+
     <!-- ==================================================================
          LOCATIONS OF PROJECT ELEMENTS
          ================================================================== -->
-    <property name="build.dir" location="build" />
-    <property name="build.main.dir" location="${build.dir}/main" />
-    <property name="build.main.classes.dir" location="${build.main.dir}/classes" />
-    <property name="build.main.api.dir" location="${build.main.dir}/api"/>
-
-    <property name="build.instrumented.classes.dir" location="${build.main.dir}/instrumented" />
-    
-    <property name="build.test.dir" location="${build.dir}/test" />
-    <property name="build.test.data.dir" location="${build.test.dir}/data" />
-    <property name="build.test.classes.dir" location="${build.test.dir}/classes" />
+    <property name="build.dir" location="work" />
 
     <property name="src.dir" location="src" />
     <property name="src.main.java.dir" location="${src.dir}/main/java" />
-    <property name="src.test.java.dir" location="${src.dir}/test/java" />
 
     <property name="lib.dir" location="lib" />
-    <property name="lib.test.dir" location="lib/test" />
 
     <!-- ==================================================================
          LOCATIONS OF BUILD ARTIFACTS
          ================================================================== -->
-    <property name="dist.dir" location="dist" />
-    <property name="dist.test.dir" location="${dist.dir}/test" />
-    <property name="dist.cobertura.dir" location="${dist.dir}/cobertura" />
-
-    <!-- ==================================================================
-         COMPILATION PROPERTIES
-         ================================================================== -->
-    <property name="debug" value="true" />
-    <property name="deprecation" value="false" />
-    <property name="optimize" value="false" />
-    <property name="source" value="1.5" />
-    <property name="target" value="1.5" />
+    <property name="dist.dir" location="target" />
 
     <!-- ==================================================================
          TASK DEFAULTS
@@ -76,20 +56,6 @@
             logError="true"/>
     </presetdef>
 
-    <presetdef name="javac">
-        <javac
-            debug="${debug}"
-            deprecation="${deprecation}"
-            optimize="${optimize}"
-            source="${source}"
-            target="${target}"
-            failonerror="true"
-
-            includeantruntime="false"
-            memoryinitialsize="256m"
-            memorymaximumsize="512m"/>
-    </presetdef>
-    
     <!-- ==================================================================
          PATHS
          ================================================================== -->
@@ -99,23 +65,11 @@
         </fileset>
     </path>
 
-    <path id="classpath.test">
-        <fileset dir="${lib.test.dir}">
-            <include name="*.jar" />
-        </fileset>
-        <path refid="classpath.main" />
-        <pathelement location="${build.instrumented.classes.dir}" />
-        <pathelement location="${build.main.classes.dir}" />
-        <pathelement location="${build.test.classes.dir}" />
-    </path>
-
     <!-- ===================================================================
          STANDARD TARGETS
          =================================================================== -->
-    <target name="compile" depends="compile-main, compile-tests"/>
     <target name="jar" depends="jar-main"/>
     <target name="dist" depends="dist-main"/>
-    <target name="javadoc" depends="javadoc-main" />
 
     <!-- ==================================================================
          ARTIFACT HANDLING
@@ -123,7 +77,6 @@
     <target name="resolve" unless="resolve.no" 
             description="Resolve all dependencies">
             <mkdir dir="${lib.dir}"/>
-            <mkdir dir="${lib.test.dir}"/>
         <codestation:resolve
             server="anthill3.urbancode.com"
             buildLife="${build.life.id}"
@@ -141,157 +94,33 @@
     <!-- ==================================================================
          COMPILE
          ================================================================== -->
-    <target name="compile-main">
-        <mkdir dir="${build.main.classes.dir}" />
+    <target name="prepare" depends="resolve">
 
-        <javac srcdir="${src.main.java.dir}"
-               destdir="${build.main.classes.dir}">
-            <classpath refid="classpath.main" />
-        </javac>
-    </target>
-
-    <target name="compile-tests" depends="compile-main">
-        <mkdir dir="${build.test.classes.dir}" />
-
-        <javac srcdir="${src.test.java.dir}"
-               destdir="${build.test.classes.dir}">
-            <classpath refid="classpath.test" />
-        </javac>
+        <exec executable="${MAVEN_HOME}/bin/mvn">
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/urbancode-vfs-client-all.jar"/>
+          <arg value="-DgroupId=com.urbancode.vfs"/>
+          <arg value="-DartifactId=vfsclient"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
     </target>
 
     <!-- ==================================================================
          JAR
          ================================================================== -->
-    <target name="jar-main" depends="compile-main, set-version-property">
-        <mkdir dir="${dist.dir}" />
-
-        <jar destfile="${dist.dir}/${project}.jar">
-            <manifest>
-                <attribute name="Implementation-Vendor" value="Urbancode"/>
-                <attribute name="Implementation-Title" value="${project}"/>
-                <attribute name="Implementation-Version" value="${version}"/>
-            </manifest>
-          
-            <fileset dir="${build.main.classes.dir}"/>
-            <fileset dir="${src.main.java.dir}" excludes="**/*.java"/>
-        </jar>
+    <target name="jar-main" depends="prepare, set-version-property">
+        <exec executable="${MAVEN_HOME}/bin/mvn">
+          <arg value="package"/>
+        </exec>
     </target>
 
-    <!-- ==================================================================
-         JAVADOC
-         ================================================================== -->
-    <target name="javadoc-main"
-            description="Generate javadocs">
-        <mkdir dir="${build.main.api.dir}"/>
-        <mkdir dir="${dist.dir}" />
-
-        <javadoc
-            packagenames="*"
-            sourcepath="${src.main.java.dir}"
-            classpathref="classpath.main"
-            destdir="${build.main.api.dir}"
-            author="false"
-            version="false"
-            use="true">
-            <link href="http://javadocs.urbancode.com/java/1.5.0/api/"/>
-        </javadoc>
-
-        <zip
-            destfile="${dist.dir}/${project}-api.zip"
-            basedir="${build.main.api.dir}"
-            includes="**"/>
-    </target>
 
     <!-- ==================================================================
          DIST
          ================================================================== -->
     <target name="dist-main" depends="jar-main"/>
-
-    <!-- ==================================================================
-         TEST
-         ================================================================== -->
-    <target name="run-tests" depends="compile-tests, cobertura-instrument" unless="tests.no">
-        <mkdir dir="${build.test.data.dir}" />
-        <mkdir dir="${dist.test.dir}" />
-
-        <junit printsummary="on" haltonfailure="false" fork="yes" showoutput="false">
-            <sysproperty key="net.sourceforge.cobertura.datafile" file="${build.dir}/.cobertura.ser" />
-            <classpath refid="classpath.test" />
-            <formatter type="brief" usefile="false" />
-            <formatter type="xml" />
-            <batchtest todir="${build.test.data.dir}">
-                <fileset dir="${build.test.classes.dir}">
-                    <include name="**/*Test.class" />
-                </fileset>
-            </batchtest>
-        </junit>
-
-        <junitreport todir="${dist.test.dir}">
-            <fileset dir="${build.test.data.dir}">
-                <include name="TEST-*.xml" />
-            </fileset>
-            <report format="frames" todir="${dist.test.dir}" />
-        </junitreport>
-    </target>
-
-    <target name="run-single-test" depends="compile-tests" unless="tests.no">
-        <mkdir dir="${reports.junit.data.dir}"/>
-        <mkdir dir="${reports.junit.html.dir}"/>
-
-        <junit 
-            printsummary="withOutAndErr"
-            haltonfailure="false"
-            fork="true"
-            dir="test-data"
-            showoutput="true"
-            failureproperty="tests.failed">
-            <classpath refid="classpath.test"/>
-            <formatter type="brief" usefile="false"/>
-            <formatter type="xml"/>
-            <batchtest todir="${reports.junit.data.dir}">
-                <fileset dir="${build.test.classes.dir}">
-                    <include name="com/urbancode/**/${run.test}.class"/>
-                </fileset>
-            </batchtest>
-        </junit>
-    </target>
-
-    <target name="cobertura-init-tasks">
-        <taskdef classpathref="classpath.test" resource="tasks.properties"/>
-    </target>
-    
-    <target name="cobertura-instrument" depends="jar, cobertura-init-tasks" if="use.cobertura">
-        <delete file="${build.dir}/.cobertura.ser"/>
-        <delete dir="${build.instrumented.classes.dir}"/>
-        <mkdir dir="${build.instrumented.classes.dir}"/>
-
-        <cobertura-instrument todir="${build.instrumented.classes.dir}" datafile="${build.dir}/.cobertura.ser">
-            <includeClasses regex=".*"/>
-            <fileset dir="${build.main.classes.dir}">
-                <include name="**/*.class" />
-                <exclude name="**/*Test.class" />
-            </fileset>
-        </cobertura-instrument>
-    </target>
-
-    <target name="cobertura-report-prepare-directory">
-        <delete dir="${dist.cobertura.dir}"/>
-        <mkdir dir="${dist.cobertura.dir}"/>
-    </target>
-
-    <target name="cobertura-reports" depends="cobertura-report-html, cobertura-report-xml"/>
-
-    <target name="cobertura-report-html" depends="cobertura-report-prepare-directory, cobertura-init-tasks">
-        <cobertura-report format="html" destdir="${dist.cobertura.dir}" datafile="${build.dir}/.cobertura.ser">
-            <fileset dir="${src.main.java.dir}" includes="**/*.java"/>
-        </cobertura-report>
-    </target>
-
-    <target name="cobertura-report-xml" depends="cobertura-report-prepare-directory, cobertura-init-tasks">
-        <cobertura-report format="xml" destdir="${dist.cobertura.dir}" datafile="${build.dir}/.cobertura.ser">
-            <fileset dir="${src.main.java.dir}" includes="**/*.java"/>
-        </cobertura-report>
-    </target>
 
     <!-- ==================================================================
          OTHER
