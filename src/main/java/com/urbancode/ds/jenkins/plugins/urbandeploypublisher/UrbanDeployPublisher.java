@@ -37,7 +37,6 @@ public class UrbanDeployPublisher extends Notifier {
      * Hold an instance of the Descriptor implementation for the UrbanDeploy Publisher.
      */
     @Extension
-
     public static final UrbanDeployPublisherDescriptor DESCRIPTOR = new UrbanDeployPublisherDescriptor();
 
     private String siteName;
@@ -170,7 +169,7 @@ public class UrbanDeployPublisher extends Notifier {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
             throws InterruptedException, IOException {
-        if (skip) {
+        if (isSkip()) {
             listener.getLogger().println("Skip artifacts upload to UrbanDeploy - step disabled.");
         }
         else if (build.getResult() == Result.FAILURE || build.getResult() == Result.ABORTED) {
@@ -178,15 +177,15 @@ public class UrbanDeployPublisher extends Notifier {
         }
         else {
             envMap = build.getEnvironment(listener);
-            versionName = resolveVariables(versionName);
-            fileIncludePatterns = resolveVariables(fileIncludePatterns);
-            fileExcludePatterns = resolveVariables(fileExcludePatterns);
-            directoryOffset = resolveVariables(directoryOffset);
+            String resolvedVersionName = resolveVariables(getVersionName());
+            String resolvedFileIncludePatterns = resolveVariables(fileIncludePatterns);
+            String resolvedFileExcludePatterns = resolveVariables(fileExcludePatterns);
+            String resolvedDirectoryOffset = resolveVariables(directoryOffset);
 
             UrbanDeploySite udSite = null;
             File workDir = new File(build.getWorkspace().toURI());
-            if (directoryOffset != null && directoryOffset.trim().length() > 0) {
-                workDir = new File(workDir, directoryOffset.trim());
+            if (resolvedDirectoryOffset != null && resolvedDirectoryOffset.trim().length() > 0) {
+                workDir = new File(workDir, resolvedDirectoryOffset.trim());
             }
             Client client = null;
             String stageId = null;
@@ -194,14 +193,14 @@ public class UrbanDeployPublisher extends Notifier {
                 udSite = getSite();
                 Set includesSet = new HashSet();
                 Set excludesSet = new HashSet();
-                for (String pattern : fileIncludePatterns.split("\n")) {
+                for (String pattern : resolvedFileIncludePatterns.split("\n")) {
                     if (pattern != null && pattern.trim().length() > 0) {
                         includesSet.add(pattern.trim());
                     }
 
                 }
-                if (fileExcludePatterns != null) {
-                    for (String pattern : fileExcludePatterns.split("\n")) {
+                if (resolvedFileExcludePatterns != null) {
+                    for (String pattern : resolvedFileExcludePatterns.split("\n")) {
                         if (pattern != null && pattern.trim().length() > 0) {
                             excludesSet.add(pattern.trim());
                         }
@@ -217,11 +216,11 @@ public class UrbanDeployPublisher extends Notifier {
 
                 listener.getLogger().println("Connecting to " + udSite.getUrl());
                 listener.getLogger()
-                        .println("Creating new component version " + versionName + " for component " + component);
-                createComponentVersion(udSite);
+                        .println("Creating new component version " + resolvedVersionName + " for component " + getComponent());
+                createComponentVersion(udSite, resolvedVersionName);
                 listener.getLogger().println("Working Directory: " + workDir.getPath());
-                listener.getLogger().println("Includes: " + fileIncludePatterns);
-                listener.getLogger().println("Excludes: " + (fileExcludePatterns == null ? "" : fileExcludePatterns));
+                listener.getLogger().println("Includes: " + resolvedFileIncludePatterns);
+                listener.getLogger().println("Excludes: " + (resolvedFileExcludePatterns == null ? "" : resolvedFileExcludePatterns));
 
                 ClientPathEntry[] entries = ClientPathEntry
                         .createPathEntriesFromFileSystem(workDir, includesArray, excludesArray,
@@ -249,9 +248,9 @@ public class UrbanDeployPublisher extends Notifier {
                     String changeSetId = client.commitStagingDirectory(stageId, changeSet);
                     listener.getLogger().println("Created change set: " + changeSetId);
 
-                    listener.getLogger().println("Labeling change set with label: " + versionName);
-                    client.labelChangeSet(repositoryId, URLDecoder.decode(changeSetId, "UTF-8"), versionName,
-                            udSite.getUser(), "Associated with version " + versionName);
+                    listener.getLogger().println("Labeling change set with label: " + resolvedVersionName);
+                    client.labelChangeSet(repositoryId, URLDecoder.decode(changeSetId, "UTF-8"), resolvedVersionName,
+                            udSite.getUser(), "Associated with version " + resolvedVersionName);
                     listener.getLogger().println("Done labeling change set!");
                 }
                 else {
@@ -282,7 +281,7 @@ public class UrbanDeployPublisher extends Notifier {
     private String getComponentRepositoryId(UrbanDeploySite site)
             throws Exception {
         String result = null;
-        URI uri = UriBuilder.fromPath(site.getUrl()).path("rest").path("deploy").path("component").path(component)
+        URI uri = UriBuilder.fromPath(site.getUrl()).path("rest").path("deploy").path("component").path(getComponent())
                 .build();
 
         String componentContent = site.executeJSONGet(uri);
@@ -303,10 +302,10 @@ public class UrbanDeployPublisher extends Notifier {
         return result;
     }
 
-    private void createComponentVersion(UrbanDeploySite site)
+    private void createComponentVersion(UrbanDeploySite site, String versionName)
             throws Exception {
         String result = null;
-        URI uri = UriBuilder.fromPath(site.getUrl()).path("rest").path("deploy").path("component").path(component)
+        URI uri = UriBuilder.fromPath(site.getUrl()).path("rest").path("deploy").path("component").path(getComponent())
                 .path("integrate").build();
         site.executeJSONPut(uri, "{\"properties\":{\"version\":\"" + versionName + "\"}}");
     }
