@@ -113,13 +113,15 @@ public class UrbanDeployPublisher extends Notifier {
         this.fileExcludePatterns = fileExcludePatterns;
     }
 
+    /*
     public String getVersionName() {
         return versionName;
-    }
+    }*/
 
+    /*
     public void setVersionName(String versionName) {
         this.versionName = versionName;
-    }
+    }*/
 
     public void setSkip(boolean skip) {
         this.skip = skip;
@@ -177,7 +179,9 @@ public class UrbanDeployPublisher extends Notifier {
         }
         else {
             envMap = build.getEnvironment(listener);
-            String resolvedVersionName = resolveVariables(getVersionName());
+            
+            // String resolvedVersionName = resolveVariables(getVersionName());
+            String resolvedVersionName = build.getDisplayName();
             String resolvedFileIncludePatterns = resolveVariables(fileIncludePatterns);
             String resolvedFileExcludePatterns = resolveVariables(fileExcludePatterns);
             String resolvedDirectoryOffset = resolveVariables(directoryOffset);
@@ -197,7 +201,6 @@ public class UrbanDeployPublisher extends Notifier {
                     if (pattern != null && pattern.trim().length() > 0) {
                         includesSet.add(pattern.trim());
                     }
-
                 }
                 if (resolvedFileExcludePatterns != null) {
                     for (String pattern : resolvedFileExcludePatterns.split("\n")) {
@@ -250,7 +253,7 @@ public class UrbanDeployPublisher extends Notifier {
 
                     listener.getLogger().println("Labeling change set with label: " + resolvedVersionName);
                     client.labelChangeSet(repositoryId, URLDecoder.decode(changeSetId, "UTF-8"), resolvedVersionName,
-                            udSite.getUser(), "Associated with version " + resolvedVersionName);
+                    udSite.getUser(), "Associated with version " + resolvedVersionName);
                     listener.getLogger().println("Done labeling change set!");
                 }
                 else {
