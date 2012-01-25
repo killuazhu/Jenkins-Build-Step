@@ -190,7 +190,7 @@ public class UrbanDeployPublisher extends Notifier {
             File workDir = new File(build.getWorkspace().toURI());
             if (resolvedDirectoryOffset != null && resolvedDirectoryOffset.trim().length() > 0) {
                 workDir = new File(workDir, resolvedDirectoryOffset.trim());
-            }
+            } 
             Client client = null;
             String stageId = null;
             try {
