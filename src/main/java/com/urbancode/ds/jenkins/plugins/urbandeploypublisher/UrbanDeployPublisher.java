@@ -95,6 +95,9 @@ public class UrbanDeployPublisher extends Notifier {
     }
 
     public String getFileIncludePatterns() {
+        if (fileIncludePatterns == null || fileIncludePatterns.trim().length() > 0) {
+            fileIncludePatterns = "**/*";
+        }
         return fileIncludePatterns;
     }
 
@@ -103,9 +106,6 @@ public class UrbanDeployPublisher extends Notifier {
     }
 
     public String getFileExcludePatterns() {
-        if (fileIncludePatterns == null || fileExcludePatterns.trim().length() > 0) {
-            fileExcludePatterns = "**/*";
-        }
         return fileExcludePatterns;
     }
 
@@ -113,15 +113,13 @@ public class UrbanDeployPublisher extends Notifier {
         this.fileExcludePatterns = fileExcludePatterns;
     }
 
-    /*
     public String getVersionName() {
         return versionName;
-    }*/
+    }
 
-    /*
     public void setVersionName(String versionName) {
         this.versionName = versionName;
-    }*/
+    }
 
     public void setSkip(boolean skip) {
         this.skip = skip;
@@ -180,8 +178,7 @@ public class UrbanDeployPublisher extends Notifier {
         else {
             envMap = build.getEnvironment(listener);
             
-            // String resolvedVersionName = resolveVariables(getVersionName());
-            String resolvedVersionName = build.getDisplayName();
+            String resolvedVersionName = resolveVariables(getVersionName());
             String resolvedFileIncludePatterns = resolveVariables(fileIncludePatterns);
             String resolvedFileExcludePatterns = resolveVariables(fileExcludePatterns);
             String resolvedDirectoryOffset = resolveVariables(directoryOffset);

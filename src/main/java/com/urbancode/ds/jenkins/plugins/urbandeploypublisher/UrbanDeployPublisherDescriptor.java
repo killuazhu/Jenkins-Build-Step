@@ -1,12 +1,10 @@
 package com.urbancode.ds.jenkins.plugins.urbandeploypublisher;
 
-import hudson.Util;
 import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
 import hudson.util.CopyOnWriteList;
 import hudson.util.FormFieldValidator;
-import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -15,11 +13,6 @@ import org.kohsuke.stapler.StaplerResponse;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.ArrayList;
-
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class UrbanDeployPublisherDescriptor extends BuildStepDescriptor<Publisher> {
     /**

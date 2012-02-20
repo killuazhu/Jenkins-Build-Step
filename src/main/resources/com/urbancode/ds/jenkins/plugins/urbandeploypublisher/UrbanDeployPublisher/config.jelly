@@ -17,6 +17,9 @@
       <f:entry title="Directory Offset" field="directoryOffset" help="${helpURL}/help-diroffset.html">
         <f:textbox/>
       </f:entry>
+      <f:entry title="Version" field="versionName" help="${helpURL}/help-versionname.html">
+        <f:textbox default="${BUILD_NUMBER}"/>
+      </f:entry>
       <f:entry title="Include" field="fileIncludePatterns" help="${helpURL}/help-fileincludes.html">
         <f:textarea default="**/*"/>
       </f:entry>
