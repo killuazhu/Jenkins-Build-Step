@@ -214,7 +214,6 @@ public class UrbanDeploySite {
 
             //if (responseCode < 200 || responseCode < 300) {
             if (responseCode != 200 ) {
-                System.out.println(method.getResponseBodyAsString());
                 throw new Exception("UrbanDeploy returned error code: " + responseCode);
             }
             else {

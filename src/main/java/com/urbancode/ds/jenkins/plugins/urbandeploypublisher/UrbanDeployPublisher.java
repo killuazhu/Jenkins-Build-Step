@@ -376,7 +376,6 @@ public class UrbanDeployPublisher extends Notifier {
                 "\",\"environment\":\"" + getDeployEnv() +
                 "\",\"versions\":[{\"version\":\"" + versionName +
                 "\",\"component\":\"" + getComponent() + "\"}]}";
-        System.out.println(json);
         site.executeJSONPut(uri,json);
 
     }
