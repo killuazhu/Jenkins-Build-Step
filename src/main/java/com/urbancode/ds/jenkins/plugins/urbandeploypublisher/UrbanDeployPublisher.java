@@ -46,6 +46,10 @@ public class UrbanDeployPublisher extends Notifier {
     private String fileExcludePatterns;
     private String versionName;
     private Boolean skip = false;
+    private Boolean deploy = false;
+    private String deployApp;
+    private String deployEnv;
+    private String deployProc;
     private Map<String, String> envMap = null;
 
     /**
@@ -53,7 +57,8 @@ public class UrbanDeployPublisher extends Notifier {
      */
     @DataBoundConstructor
     public UrbanDeployPublisher(String siteName, String component, String versionName, String directoryOffset,
-                                String fileIncludePatterns, String fileExcludePatterns, Boolean skip) {
+                                String fileIncludePatterns, String fileExcludePatterns, Boolean skip, Boolean deploy,
+                                String deployApp, String deployEnv, String deployProc) {
         this.component = component;
         this.versionName = versionName;
         this.directoryOffset = directoryOffset;
@@ -61,6 +66,10 @@ public class UrbanDeployPublisher extends Notifier {
         this.fileExcludePatterns = fileExcludePatterns;
         this.siteName = siteName;
         this.skip = skip;
+        this.deploy = deploy;
+        this.deployApp = deployApp;
+        this.deployEnv = deployEnv;
+        this.deployProc = deployProc;
     }
 
     public String getSiteName() {
@@ -127,6 +136,38 @@ public class UrbanDeployPublisher extends Notifier {
 
     public boolean isSkip() {
         return skip;
+    }
+
+    public void setDeploy(boolean deploy) {
+        this.deploy = deploy;
+    }
+
+    public boolean isDeploy() {
+        return deploy;
+    }
+
+    public void setDeployApp(String deployApp) {
+        this.deployApp = deployApp;
+    }
+
+    public String getDeployApp() {
+        return deployApp;
+    }
+
+    public void setDeployEnv(String deployEnv) {
+        this.deployEnv = deployEnv;
+    }
+
+    public String getDeployEnv() {
+        return deployEnv;
+    }
+
+    public void setDeployProc(String deployProc) {
+        this.deployProc = deployProc;
+    }
+
+    public String getDeployProc() {
+        return deployProc;
     }
 
     /**
@@ -256,6 +297,22 @@ public class UrbanDeployPublisher extends Notifier {
                 else {
                     listener.getLogger().println("Did not find any files to upload!");
                 }
+
+                if (isDeploy()) {
+                    if (getDeployApp() == null || getDeployApp().trim().length() == 0) {
+                        throw new Exception("Deploy Application is a required field if Deploy is selected!");
+                    }
+                    if (getDeployEnv() == null || getDeployEnv().trim().length() == 0) {
+                        throw new Exception("Deploy Environment is a required field if Deploy is selected!");
+                    }
+                    if (getDeployProc() == null || getDeployProc().trim().length() == 0) {
+                        throw new Exception("Deploy Process is a required field if Deploy is selected!");
+                    }
+
+                    listener.getLogger().println("Starting deployment of " + getDeployApp() + " in " + getDeployEnv());
+                    createProcessRequest(udSite, resolvedVersionName);
+                }
+
             }
             catch (Throwable th) {
                 th.printStackTrace(listener.error("Failed to upload files" + th));
@@ -304,12 +361,25 @@ public class UrbanDeployPublisher extends Notifier {
 
     private void createComponentVersion(UrbanDeploySite site, String versionName)
             throws Exception {
-        String result = null;
         URI uri = UriBuilder.fromPath(site.getUrl()).path("rest").path("deploy").path("component").path(getComponent())
                 .path("integrate").build();
         site.executeJSONPut(uri, "{\"properties\":{\"version\":\"" + versionName + "\"}}");
     }
 
+    private void createProcessRequest(UrbanDeploySite site, String versionName)
+            throws Exception {
+        URI uri = UriBuilder.fromPath(site.getUrl()).path("cli").path("applicationProcessRequest")
+                .path("request").build();
+        String json =
+                "{\"application\":\"" + getDeployApp() +
+                "\",\"applicationProcess\":\"" + getDeployProc() +
+                "\",\"environment\":\"" + getDeployEnv() +
+                "\",\"versions\":[{\"version\":\"" + versionName +
+                "\",\"component\":\"" + getComponent() + "\"}]}";
+        System.out.println(json);
+        site.executeJSONPut(uri,json);
+
+    }
 
     private String resolveVariables(String input) {
         String result = input;
