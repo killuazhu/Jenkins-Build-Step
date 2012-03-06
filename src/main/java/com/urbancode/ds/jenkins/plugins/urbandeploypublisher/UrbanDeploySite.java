@@ -166,7 +166,8 @@ public class UrbanDeploySite {
         try {
             HttpClientParams params = httpClient.getParams();
             params.setAuthenticationPreemptive(true);
-
+            params.setParameter("http.protocol.allow-circular-redirects", true);
+            
             UsernamePasswordCredentials clientCredentials = new UsernamePasswordCredentials(user, password);
             httpClient.getState().setCredentials(AuthScope.ANY, clientCredentials);
 
