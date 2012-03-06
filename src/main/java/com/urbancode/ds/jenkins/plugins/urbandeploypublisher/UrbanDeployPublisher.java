@@ -41,6 +41,7 @@ public class UrbanDeployPublisher extends Notifier {
 
     private String siteName;
     private String component;
+    private String baseDir;
     private String directoryOffset;
     private String fileIncludePatterns;
     private String fileExcludePatterns;
@@ -56,11 +57,12 @@ public class UrbanDeployPublisher extends Notifier {
      * Default constructor
      */
     @DataBoundConstructor
-    public UrbanDeployPublisher(String siteName, String component, String versionName, String directoryOffset,
+    public UrbanDeployPublisher(String siteName, String component, String versionName, String directoryOffset, String baseDir,
                                 String fileIncludePatterns, String fileExcludePatterns, Boolean skip, Boolean deploy,
                                 String deployApp, String deployEnv, String deployProc) {
         this.component = component;
         this.versionName = versionName;
+        this.baseDir = baseDir;
         this.directoryOffset = directoryOffset;
         this.fileIncludePatterns = fileIncludePatterns;
         this.fileExcludePatterns = fileExcludePatterns;
@@ -93,6 +95,14 @@ public class UrbanDeployPublisher extends Notifier {
 
     public void setComponent(String component) {
         this.component = component;
+    }
+
+    public String getBaseDir() {
+        return baseDir;
+    }
+
+    public void setBaseDir(String baseDir) {
+        this.baseDir= baseDir;
     }
 
     public String getDirectoryOffset() {
@@ -219,19 +229,23 @@ public class UrbanDeployPublisher extends Notifier {
         else {
             envMap = build.getEnvironment(listener);
             
+            String resolvedBaseDir = resolveVariables(getBaseDir());
             String resolvedVersionName = resolveVariables(getVersionName());
             String resolvedFileIncludePatterns = resolveVariables(fileIncludePatterns);
             String resolvedFileExcludePatterns = resolveVariables(fileExcludePatterns);
             String resolvedDirectoryOffset = resolveVariables(directoryOffset);
 
             UrbanDeploySite udSite = null;
-            File workDir = new File(build.getWorkspace().toURI());
-            if (resolvedDirectoryOffset != null && resolvedDirectoryOffset.trim().length() > 0) {
-                workDir = new File(workDir, resolvedDirectoryOffset.trim());
-            } 
             Client client = null;
             String stageId = null;
             try {
+                File workDir = new File(resolvedBaseDir);
+                if (!workDir.exists()) throw new Exception("Base artifact directory " + workDir.toString()
+                        + " does not exits!");
+                if (resolvedDirectoryOffset != null && resolvedDirectoryOffset.trim().length() > 0) {
+                    workDir = new File(workDir, resolvedDirectoryOffset.trim());
+                }
+
                 udSite = getSite();
                 Set includesSet = new HashSet();
                 Set excludesSet = new HashSet();
