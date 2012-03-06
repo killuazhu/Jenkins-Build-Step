@@ -158,7 +158,7 @@ public class UrbanDeploySite {
 
         if ("https".equalsIgnoreCase(uri.getScheme())) {
             ProtocolSocketFactory socketFactory = new OpenSSLProtocolSocketFactory();
-            Protocol https = new Protocol("https", socketFactory, uri.getPort());
+            Protocol https = new Protocol("https", socketFactory, 443);
             Protocol.registerProtocol("https", https);
         }
 
@@ -166,8 +166,7 @@ public class UrbanDeploySite {
         try {
             HttpClientParams params = httpClient.getParams();
             params.setAuthenticationPreemptive(true);
-            params.setParameter("http.protocol.allow-circular-redirects", true);
-            
+
             UsernamePasswordCredentials clientCredentials = new UsernamePasswordCredentials(user, password);
             httpClient.getState().setCredentials(AuthScope.ANY, clientCredentials);
 
@@ -196,7 +195,7 @@ public class UrbanDeploySite {
 
         if ("https".equalsIgnoreCase(uri.getScheme())) {
             ProtocolSocketFactory socketFactory = new OpenSSLProtocolSocketFactory();
-            Protocol https = new Protocol("https", socketFactory, uri.getPort());
+            Protocol https = new Protocol("https", socketFactory, 443);
             Protocol.registerProtocol("https", https);
         }
 
