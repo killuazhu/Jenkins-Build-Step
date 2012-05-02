@@ -14,6 +14,9 @@
       <f:entry title="Component" field="component" help="${helpURL}/help-component.html">
         <f:textbox/>
       </f:entry>
+      <f:entry title="Base Artifact Directory" field="baseDir" help="${helpURL}/help-basedir.html">
+        <f:textbox default="${WORKSPACE}"/>
+      </f:entry>
       <f:entry title="Directory Offset" field="directoryOffset" help="${helpURL}/help-diroffset.html">
         <f:textbox/>
       </f:entry>
