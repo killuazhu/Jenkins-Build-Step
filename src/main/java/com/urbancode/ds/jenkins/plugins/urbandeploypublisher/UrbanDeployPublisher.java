@@ -87,7 +87,7 @@ public class UrbanDeployPublisher extends Notifier {
         this.siteName = siteName;
     }
 
-    public String getComponent() {
+    public String getComponentName() {
         return component;
     }
 
@@ -219,6 +219,7 @@ public class UrbanDeployPublisher extends Notifier {
         else {
             envMap = build.getEnvironment(listener);
             
+            String resolvedComponentName = resolveVariables(getComponentName());
             String resolvedVersionName = resolveVariables(getVersionName());
             String resolvedFileIncludePatterns = resolveVariables(fileIncludePatterns);
             String resolvedFileExcludePatterns = resolveVariables(fileExcludePatterns);
@@ -257,8 +258,8 @@ public class UrbanDeployPublisher extends Notifier {
 
                 listener.getLogger().println("Connecting to " + udSite.getUrl());
                 listener.getLogger()
-                        .println("Creating new component version " + resolvedVersionName + " for component " + getComponent());
-                createComponentVersion(udSite, resolvedVersionName);
+                        .println("Creating new component version " + resolvedVersionName + " for component " + resolvedComponentName);
+                createComponentVersion(udSite, resolvedComponentName, resolvedVersionName);
                 listener.getLogger().println("Working Directory: " + workDir.getPath());
                 listener.getLogger().println("Includes: " + resolvedFileIncludePatterns);
                 listener.getLogger().println("Excludes: " + (resolvedFileExcludePatterns == null ? "" : resolvedFileExcludePatterns));
@@ -281,7 +282,7 @@ public class UrbanDeployPublisher extends Notifier {
                         client.addFileToStagingDirectory(stageId, entry.getPath(), entryFile);
                     }
 
-                    String repositoryId = getComponentRepositoryId(udSite);
+                    String repositoryId = getComponentRepositoryId(udSite, resolvedComponentName);
                     ClientChangeSet changeSet =
                             ClientChangeSet.newChangeSet(repositoryId, udSite.getUser(), "Uploaded by Jenkins", entries);
 
@@ -310,7 +311,7 @@ public class UrbanDeployPublisher extends Notifier {
                     }
 
                     listener.getLogger().println("Starting deployment of " + getDeployApp() + " in " + getDeployEnv());
-                    createProcessRequest(udSite, resolvedVersionName);
+                    createProcessRequest(udSite, resolvedComponentName, resolvedVersionName);
                 }
 
             }
@@ -335,10 +336,10 @@ public class UrbanDeployPublisher extends Notifier {
         return true;
     }
 
-    private String getComponentRepositoryId(UrbanDeploySite site)
+    private String getComponentRepositoryId(UrbanDeploySite site, String componentName)
             throws Exception {
         String result = null;
-        URI uri = UriBuilder.fromPath(site.getUrl()).path("rest").path("deploy").path("component").path(getComponent())
+        URI uri = UriBuilder.fromPath(site.getUrl()).path("rest").path("deploy").path("component").path(componentName)
                 .build();
 
         String componentContent = site.executeJSONGet(uri);
@@ -359,14 +360,14 @@ public class UrbanDeployPublisher extends Notifier {
         return result;
     }
 
-    private void createComponentVersion(UrbanDeploySite site, String versionName)
+    private void createComponentVersion(UrbanDeploySite site, String componentName, String versionName)
             throws Exception {
-        URI uri = UriBuilder.fromPath(site.getUrl()).path("rest").path("deploy").path("component").path(getComponent())
+        URI uri = UriBuilder.fromPath(site.getUrl()).path("rest").path("deploy").path("component").path(componentName)
                 .path("integrate").build();
         site.executeJSONPut(uri, "{\"properties\":{\"version\":\"" + versionName + "\"}}");
     }
 
-    private void createProcessRequest(UrbanDeploySite site, String versionName)
+    private void createProcessRequest(UrbanDeploySite site, String componentName, String versionName)
             throws Exception {
         URI uri = UriBuilder.fromPath(site.getUrl()).path("cli").path("applicationProcessRequest")
                 .path("request").build();
@@ -375,7 +376,7 @@ public class UrbanDeployPublisher extends Notifier {
                 "\",\"applicationProcess\":\"" + getDeployProc() +
                 "\",\"environment\":\"" + getDeployEnv() +
                 "\",\"versions\":[{\"version\":\"" + versionName +
-                "\",\"component\":\"" + getComponent() + "\"}]}";
+                "\",\"component\":\"" + componentName + "\"}]}";
         site.executeJSONPut(uri,json);
 
     }
