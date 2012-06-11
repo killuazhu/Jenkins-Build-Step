@@ -89,7 +89,7 @@ public class UrbanDeployPublisher extends Notifier {
         this.siteName = siteName;
     }
 
-    public String getComponentName() {
+    public String getComponent() {
         return component;
     }
 
@@ -229,7 +229,7 @@ public class UrbanDeployPublisher extends Notifier {
         else {
             envMap = build.getEnvironment(listener);
             
-            String resolvedComponentName = resolveVariables(getComponentName());
+            String resolvedComponent = resolveVariables(getComponent());
             String resolvedBaseDir = resolveVariables(getBaseDir());
             String resolvedVersionName = resolveVariables(getVersionName());
             String resolvedFileIncludePatterns = resolveVariables(fileIncludePatterns);
@@ -242,7 +242,7 @@ public class UrbanDeployPublisher extends Notifier {
             try {
                 File workDir = new File(resolvedBaseDir);
                 if (!workDir.exists()) throw new Exception("Base artifact directory " + workDir.toString()
-                        + " does not exits!");
+                        + " does not exist!");
                 if (resolvedDirectoryOffset != null && resolvedDirectoryOffset.trim().length() > 0) {
                     workDir = new File(workDir, resolvedDirectoryOffset.trim());
                 }
@@ -272,8 +272,8 @@ public class UrbanDeployPublisher extends Notifier {
 
                 listener.getLogger().println("Connecting to " + udSite.getUrl());
                 listener.getLogger()
-                        .println("Creating new component version " + resolvedVersionName + " for component " + resolvedComponentName);
-                createComponentVersion(udSite, resolvedComponentName, resolvedVersionName);
+                        .println("Creating new component version " + resolvedVersionName + " for component " + resolvedComponent);
+                createComponentVersion(udSite, resolvedComponent, resolvedVersionName);
                 listener.getLogger().println("Working Directory: " + workDir.getPath());
                 listener.getLogger().println("Includes: " + resolvedFileIncludePatterns);
                 listener.getLogger().println("Excludes: " + (resolvedFileExcludePatterns == null ? "" : resolvedFileExcludePatterns));
@@ -296,7 +296,7 @@ public class UrbanDeployPublisher extends Notifier {
                         client.addFileToStagingDirectory(stageId, entry.getPath(), entryFile);
                     }
 
-                    String repositoryId = getComponentRepositoryId(udSite, resolvedComponentName);
+                    String repositoryId = getComponentRepositoryId(udSite, resolvedComponent);
                     ClientChangeSet changeSet =
                             ClientChangeSet.newChangeSet(repositoryId, udSite.getUser(), "Uploaded by Jenkins", entries);
 
@@ -325,7 +325,7 @@ public class UrbanDeployPublisher extends Notifier {
                     }
 
                     listener.getLogger().println("Starting deployment of " + getDeployApp() + " in " + getDeployEnv());
-                    createProcessRequest(udSite, resolvedComponentName, resolvedVersionName);
+                    createProcessRequest(udSite, resolvedComponent, resolvedVersionName);
                 }
 
             }

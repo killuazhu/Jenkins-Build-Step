@@ -14,6 +14,8 @@
 /dist
 /lib
 /ecbin
+/target
+/bin
 
 *.iml
 *.ipr
