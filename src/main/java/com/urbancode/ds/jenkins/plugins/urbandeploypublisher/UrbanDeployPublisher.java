@@ -43,8 +43,8 @@ public class UrbanDeployPublisher extends Notifier {
     private String component;
     private String baseDir;
     private String directoryOffset;
-    private String fileIncludes;
-    private String fileExcludes;
+    private String fileIncludePatterns;
+    private String fileExcludePatterns;
     private String versionName;
     private Boolean skip = false;
     private Boolean deploy = false;
@@ -64,8 +64,8 @@ public class UrbanDeployPublisher extends Notifier {
         this.versionName = versionName;
         this.baseDir = baseDir;
         this.directoryOffset = directoryOffset;
-        this.fileIncludes = fileIncludePatterns;
-        this.fileExcludes = fileExcludePatterns;
+        this.fileIncludePatterns = fileIncludePatterns;
+        this.fileExcludePatterns = fileExcludePatterns;
         this.siteName = siteName;
         this.skip = skip;
         this.deploy = deploy;
@@ -113,23 +113,23 @@ public class UrbanDeployPublisher extends Notifier {
         this.directoryOffset = directoryOffset;
     }
 
-    public String getFileIncludes() {
-        if (fileIncludes == null || fileIncludes.trim().length() > 0) {
-            fileIncludes = "**/*";
+    public String getFileIncludePatterns() {
+        if (fileIncludePatterns == null || fileIncludePatterns.trim().length() == 0) {
+            fileIncludePatterns = "**/*";
         }
-        return fileIncludes;
+        return fileIncludePatterns;
     }
 
-    public void setFileIncludes(String fileIncludePatterns) {
-        this.fileIncludes = fileIncludePatterns;
+    public void setFileIncludePatterns(String fileIncludePatterns) {
+        this.fileIncludePatterns = fileIncludePatterns;
     }
 
-    public String getFileExcludes() {
-        return fileExcludes;
+    public String getFileExcludePatterns() {
+        return fileExcludePatterns;
     }
 
-    public void setFileExcludes(String fileExcludePatterns) {
-        this.fileExcludes = fileExcludePatterns;
+    public void setFileExcludePatterns(String fileExcludePatterns) {
+        this.fileExcludePatterns = fileExcludePatterns;
     }
 
     public String getVersionName() {
@@ -232,8 +232,8 @@ public class UrbanDeployPublisher extends Notifier {
             String resolvedComponent = resolveVariables(getComponent());
             String resolvedBaseDir = resolveVariables(getBaseDir());
             String resolvedVersionName = resolveVariables(getVersionName());
-            String resolvedFileIncludePatterns = resolveVariables(fileIncludes);
-            String resolvedFileExcludePatterns = resolveVariables(fileExcludes);
+            String resolvedFileIncludePatterns = resolveVariables(fileIncludePatterns);
+            String resolvedFileExcludePatterns = resolveVariables(fileExcludePatterns);
             String resolvedDirectoryOffset = resolveVariables(directoryOffset);
 
             UrbanDeploySite udSite = null;
