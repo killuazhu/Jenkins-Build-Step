@@ -235,7 +235,7 @@ public class UrbanDeploySite {
         return result;
     }
 
-    public String executeJSONPost(URI uri, Map<String, String> parameterMap) throws Exception {
+    public String executeJSONPost(URI uri) throws Exception {
         String result = null;
         HttpClient httpClient = new HttpClient();
 
@@ -246,12 +246,7 @@ public class UrbanDeploySite {
         }
 
         PostMethod method = new PostMethod(uri.toString());
-        List<NameValuePair> parameters = new ArrayList<NameValuePair>();
-        for (String key : parameterMap.keySet()) {
-            parameters.add(new NameValuePair(key, parameterMap.get(key)));
-        }
         
-        method.setRequestBody(parameters.toArray(new NameValuePair[parameters.size()]));
         method.setRequestHeader("charset", "utf-8");
         try {
             HttpClientParams params = httpClient.getParams();

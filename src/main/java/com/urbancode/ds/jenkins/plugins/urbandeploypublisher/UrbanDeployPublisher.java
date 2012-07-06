@@ -377,13 +377,14 @@ public class UrbanDeployPublisher extends Notifier {
 
     private void createComponentVersion(UrbanDeploySite site, String componentName, String versionName)
             throws Exception {
-        URI uri = UriBuilder.fromPath(site.getUrl()).path("cli").path("version")
-                .path("createVersion").build();
-        Map<String, String> parameters = new HashMap<String, String>();
-        parameters.put("component", componentName);
-        parameters.put("name", versionName);
+        UriBuilder uriBuilder = UriBuilder.fromPath(site.getUrl()).path("cli").path("version")
+                        .path("createVersion");
         
-        site.executeJSONPost(uri, parameters);
+        uriBuilder.queryParam("component", componentName);
+        uriBuilder.queryParam("name", versionName);
+        URI uri = uriBuilder.build();
+        
+        site.executeJSONPost(uri);
     }
 
     private void createProcessRequest(UrbanDeploySite site, String componentName, String versionName)
