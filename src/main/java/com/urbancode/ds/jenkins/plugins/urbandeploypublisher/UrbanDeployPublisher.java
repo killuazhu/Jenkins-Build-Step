@@ -375,8 +375,9 @@ public class UrbanDeployPublisher extends Notifier {
         return result;
     }
 
-    private void createComponentVersion(UrbanDeploySite site, String componentName, String versionName)
-            throws Exception {
+    private void createComponentVersion(UrbanDeploySite site, String componentName,
+            String versionName, BuildListener listener)
+    throws Exception {
         UriBuilder uriBuilder = UriBuilder.fromPath(site.getUrl()).path("cli").path("version")
                         .path("createVersion");
         
@@ -384,7 +385,10 @@ public class UrbanDeployPublisher extends Notifier {
         uriBuilder.queryParam("name", versionName);
         URI uri = uriBuilder.build();
         
+        listener.getLogger().println("Creating new version \""+versionName+
+                "\" on component "+componentName+"...");
         site.executeJSONPost(uri);
+        listener.getLogger().println("Successfully created new component version.");
     }
 
     private void createProcessRequest(UrbanDeploySite site, String componentName, String versionName)
