@@ -2,9 +2,11 @@ package com.urbancode.ds.jenkins.plugins.urbandeploypublisher;
 
 import com.urbancode.commons.util.https.OpenSSLProtocolSocketFactory;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.protocol.Protocol;
@@ -13,6 +15,9 @@ import org.apache.commons.lang.StringUtils;
 
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class UrbanDeploySite {
 
@@ -213,6 +218,50 @@ public class UrbanDeploySite {
             int responseCode = httpClient.executeMethod(method);
 
             //if (responseCode < 200 || responseCode < 300) {
+            if (responseCode != 200 ) {
+                throw new Exception("UrbanDeploy returned error code: " + responseCode);
+            }
+            else {
+                result = method.getResponseBodyAsString();
+            }
+        }
+        catch (Exception e) {
+            throw new Exception("Error connecting to UrbanDeploy: " + e.getMessage());
+        }
+        finally {
+            method.releaseConnection();
+        }
+
+        return result;
+    }
+
+    public String executeJSONPost(URI uri, Map<String, String> parameterMap) throws Exception {
+        String result = null;
+        HttpClient httpClient = new HttpClient();
+
+        if ("https".equalsIgnoreCase(uri.getScheme())) {
+            ProtocolSocketFactory socketFactory = new OpenSSLProtocolSocketFactory();
+            Protocol https = new Protocol("https", socketFactory, 443);
+            Protocol.registerProtocol("https", https);
+        }
+
+        PostMethod method = new PostMethod(uri.toString());
+        List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+        for (String key : parameterMap.keySet()) {
+            parameters.add(new NameValuePair(key, parameterMap.get(key)));
+        }
+        
+        method.setRequestBody(parameters.toArray(new NameValuePair[parameters.size()]));
+        method.setRequestHeader("charset", "utf-8");
+        try {
+            HttpClientParams params = httpClient.getParams();
+            params.setAuthenticationPreemptive(true);
+
+            UsernamePasswordCredentials clientCredentials = new UsernamePasswordCredentials(user, password);
+            httpClient.getState().setCredentials(AuthScope.ANY, clientCredentials);
+
+            int responseCode = httpClient.executeMethod(method);
+
             if (responseCode != 200 ) {
                 throw new Exception("UrbanDeploy returned error code: " + responseCode);
             }

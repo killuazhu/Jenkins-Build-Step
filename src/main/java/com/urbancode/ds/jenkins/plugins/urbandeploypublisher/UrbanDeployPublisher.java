@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -376,9 +377,13 @@ public class UrbanDeployPublisher extends Notifier {
 
     private void createComponentVersion(UrbanDeploySite site, String componentName, String versionName)
             throws Exception {
-        URI uri = UriBuilder.fromPath(site.getUrl()).path("rest").path("deploy").path("component").path(componentName)
-                .path("integrate").build();
-        site.executeJSONPut(uri, "{\"properties\":{\"version\":\"" + versionName + "\"}}");
+        URI uri = UriBuilder.fromPath(site.getUrl()).path("cli").path("version")
+                .path("createVersion").build();
+        Map<String, String> parameters = new HashMap<String, String>();
+        parameters.put("component", componentName);
+        parameters.put("name", versionName);
+        
+        site.executeJSONPost(uri, parameters);
     }
 
     private void createProcessRequest(UrbanDeploySite site, String componentName, String versionName)
