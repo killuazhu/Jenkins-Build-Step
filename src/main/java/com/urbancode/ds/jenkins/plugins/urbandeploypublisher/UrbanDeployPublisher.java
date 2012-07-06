@@ -272,8 +272,6 @@ public class UrbanDeployPublisher extends Notifier {
 
 
                 listener.getLogger().println("Connecting to " + udSite.getUrl());
-                listener.getLogger()
-                        .println("Creating new component version " + resolvedVersionName + " for component " + resolvedComponent);
                 createComponentVersion(udSite, resolvedComponent, resolvedVersionName, listener);
                 listener.getLogger().println("Working Directory: " + workDir.getPath());
                 listener.getLogger().println("Includes: " + resolvedFileIncludePatterns);
