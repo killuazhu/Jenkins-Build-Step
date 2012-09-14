@@ -1,8 +1,11 @@
 package com.urbancode.ds.jenkins.plugins.urbandeploypublisher;
 
-import com.urbancode.commons.util.https.OpenSSLProtocolSocketFactory;
+import java.io.Serializable;
+import java.net.URI;
+
+import javax.ws.rs.core.UriBuilder;
+
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -13,15 +16,13 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.lang.StringUtils;
 
-import javax.ws.rs.core.UriBuilder;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.urbancode.commons.util.https.OpenSSLProtocolSocketFactory;
 
-public class UrbanDeploySite {
+public class UrbanDeploySite implements Serializable {
 
-	/** The profile name. */
+    private static final long serialVersionUID = -8723534991244260459L;
+
+    /** The profile name. */
 	private String profileName;
 
 	/** The url. */
