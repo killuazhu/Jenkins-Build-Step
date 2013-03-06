@@ -122,27 +122,26 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
                 client.labelChangeSet(repositoryId, URLDecoder.decode(changeSetId, "UTF-8"), resolvedVersionName,
                 udSite.getUser(), "Associated with version " + resolvedVersionName);
                 listener.getLogger().println("Done labeling change set!");
+                //staging directory get deleted in labelChangeSet call
+                listener.getLogger().println("Deleted staging directory: " + stageId);
             }
             else {
                 listener.getLogger().println("Did not find any files to upload!");
             }
         }
         catch (Throwable e) {
-            throw new Exception("Failed to upload files", e);
-        }
-        finally {
             if (client != null && stageId != null) {
                 try {
                     client.deleteStagingDirectory(stageId);
                     listener.getLogger().println("Deleted staging directory: " + stageId);
                 }
-                catch (Exception e) {
+                catch (Exception ex) {
                     listener.getLogger()
-                            .println("Failed to delete staging directory " + stageId + ": " + e.getMessage());
+                            .println("Failed to delete staging directory " + stageId + ": " + ex.getMessage());
                 }
             }
+            throw new Exception("Failed to upload files", e);
         }
-        
         return true;
     }
 

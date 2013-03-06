@@ -8,6 +8,18 @@
 
     <property environment="env"/>
 
+	<!-- ==================================================================
+         PROJECT CONFIGURATION 
+         ================================================================== -->
+    <property name="project" value="${ant.project.name}"/>
+    <property name="build.life.id" value="${env.AH_BUILD_LIFE_ID}"/>
+
+    <property name="ahp.branch.name" value="master"/>
+    <property name="ahp.project.name" value="${project}"/>
+    <property name="ahp.workflow.name" value="build workflow [${ahp.branch.name}]"/>
+
+    <property name="MAVEN_HOME" value="${env.MAVEN_HOME}"/>
+
     <!-- ==================================================================
          ENVIRONMENTAL DETECTION
          ================================================================== -->
@@ -19,18 +31,15 @@
             <os family="windows" />
         </not>
     </condition>
-
-    <!-- ==================================================================
-         PROJECT CONFIGURATION 
-         ================================================================== -->
-    <property name="project" value="${ant.project.name}"/>
-    <property name="build.life.id" value="${env.AH_BUILD_LIFE_ID}"/>
-
-    <property name="ahp.branch.name" value="master"/>
-    <property name="ahp.project.name" value="${project}"/>
-    <property name="ahp.workflow.name" value="build workflow [${ahp.branch.name}]"/>
-
-    <property name="MAVEN_HOME" value="${env.MAVEN_HOME}"/>
+	
+	<condition property="mvn" value="${MAVEN_HOME}/bin/mvn.bat">
+		<os family="windows" />
+	</condition>
+	<condition property="mvn" value="${MAVEN_HOME}/bin/mvn">
+        <not>
+            <os family="windows" />
+        </not>
+    </condition>
 
     <!-- ==================================================================
          LOCATIONS OF PROJECT ELEMENTS
@@ -96,7 +105,7 @@
          ================================================================== -->
     <target name="prepare" depends="resolve">
 
-        <exec executable="${MAVEN_HOME}/bin/mvn">
+        <exec executable="${mvn}" osfamily="unix">
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/urbancode-vfs-client-all.jar"/>
           <arg value="-DgroupId=com.urbancode.vfs"/>
@@ -111,7 +120,7 @@
          JAR
          ================================================================== -->
     <target name="jar-main" depends="prepare, set-version-property">
-        <exec executable="${MAVEN_HOME}/bin/mvn">
+        <exec executable="${mvn}">
           <arg value="package"/>
         </exec>
     </target>
