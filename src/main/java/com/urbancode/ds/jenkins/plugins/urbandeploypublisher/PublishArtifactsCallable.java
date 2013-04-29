@@ -96,7 +96,6 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
                     .createPathEntriesFromFileSystem(workDir, includesArray, excludesArray,
                             FileListerBuilder.Directories.INCLUDE_ALL, FileListerBuilder.Permissions.BEST_EFFORT,
                             FileListerBuilder.Symlinks.AS_LINK, "SHA-256");
-    
             listener.getLogger().println("Invoke vfs client...");
             client = new Client(udSite.getUrl() + "/vfs", null, null);
             stageId = client.createStagingDirectory();

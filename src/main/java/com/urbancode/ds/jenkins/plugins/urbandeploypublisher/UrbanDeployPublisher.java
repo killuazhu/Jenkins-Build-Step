@@ -226,6 +226,9 @@ public class UrbanDeployPublisher extends Notifier {
             String resolvedFileIncludePatterns = resolveVariables(fileIncludePatterns);
             String resolvedFileExcludePatterns = resolveVariables(fileExcludePatterns);
             String resolvedDirectoryOffset = resolveVariables(directoryOffset);
+            String resolvedDeployApp = resolveVariables(getDeployApp());
+            String resolvedDeployEnv = resolveVariables(getDeployEnv());
+            String resolvedDeployProc = resolveVariables(getDeployProc());
 
             UrbanDeploySite udSite = getSite();
             try {
@@ -235,18 +238,19 @@ public class UrbanDeployPublisher extends Notifier {
                 launcher.getChannel().call(task);
 
                 if (isDeploy()) {
-                    if (getDeployApp() == null || getDeployApp().trim().length() == 0) {
+                    if (resolvedDeployApp == null || resolvedDeployApp.trim().length() == 0) {
                         throw new Exception("Deploy Application is a required field if Deploy is selected!");
                     }
-                    if (getDeployEnv() == null || getDeployEnv().trim().length() == 0) {
+                    if (resolvedDeployEnv == null || resolvedDeployEnv.trim().length() == 0) {
                         throw new Exception("Deploy Environment is a required field if Deploy is selected!");
                     }
-                    if (getDeployProc() == null || getDeployProc().trim().length() == 0) {
+                    if (resolvedDeployProc == null || resolvedDeployProc.trim().length() == 0) {
                         throw new Exception("Deploy Process is a required field if Deploy is selected!");
                     }
 
-                    listener.getLogger().println("Starting deployment of " + getDeployApp() + " in " + getDeployEnv());
-                    createProcessRequest(udSite, resolvedComponent, resolvedVersionName);
+                    listener.getLogger().println("Starting deployment of " + resolvedDeployApp + " in " + resolvedDeployEnv);
+                    createProcessRequest(udSite, resolvedComponent, resolvedVersionName, 
+                            resolvedDeployApp, resolvedDeployEnv, resolvedDeployProc);
                 }
             }
             catch (Throwable th) {
@@ -258,14 +262,15 @@ public class UrbanDeployPublisher extends Notifier {
         return true;
     }
 
-    private void createProcessRequest(UrbanDeploySite site, String componentName, String versionName)
+    private void createProcessRequest(UrbanDeploySite site, String componentName, String versionName,
+            String app, String env, String proc)
             throws Exception {
         URI uri = UriBuilder.fromPath(site.getUrl()).path("cli").path("applicationProcessRequest")
                 .path("request").build();
         String json =
-                "{\"application\":\"" + getDeployApp() +
-                "\",\"applicationProcess\":\"" + getDeployProc() +
-                "\",\"environment\":\"" + getDeployEnv() +
+                "{\"application\":\"" + app +
+                "\",\"applicationProcess\":\"" + proc +
+                "\",\"environment\":\"" + env +
                 "\",\"versions\":[{\"version\":\"" + versionName +
                 "\",\"component\":\"" + componentName + "\"}]}";
         site.executeJSONPut(uri,json);
