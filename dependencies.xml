@@ -11,6 +11,30 @@
         <directory>lib</directory>
       </delivery>
     </dependency>
+    
+    <dependency>
+      <cs-project name="Jakarta Commons Logging"/>
+      <criteria stamp="1.1"/>
+      <delivery artifact-set="Default">
+        <directory>lib</directory>
+      </delivery>
+    </dependency>
+    
+        <dependency>
+      <cs-project name="Jakarta Commons Codec"/>
+      <criteria status="success"/>
+      <delivery artifact-set="Default">
+        <directory>lib</directory>
+      </delivery>
+    </dependency>
+    
+    <dependency>
+      <cs-project name="Apache HttpComponents"/>
+      <criteria stamp="4.2.1"/>
+      <delivery artifact-set="lib">
+        <directory>lib</directory>
+      </delivery>
+    </dependency>
 
     <!-- TEST -->
   </dependencies>

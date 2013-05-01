@@ -43,6 +43,9 @@ public class UrbanDeployPublisher extends Notifier {
     private String deployEnv;
     private String deployProc;
     private Map<String, String> envMap = null;
+    
+    private String properties;
+    private String description;
 
     /**
      * Default constructor
@@ -50,7 +53,7 @@ public class UrbanDeployPublisher extends Notifier {
     @DataBoundConstructor
     public UrbanDeployPublisher(String siteName, String component, String versionName, String directoryOffset, String baseDir,
                                 String fileIncludePatterns, String fileExcludePatterns, Boolean skip, Boolean deploy,
-                                String deployApp, String deployEnv, String deployProc) {
+                                String deployApp, String deployEnv, String deployProc, String properties, String description) {
         this.component = component;
         this.versionName = versionName;
         this.baseDir = baseDir;
@@ -63,6 +66,8 @@ public class UrbanDeployPublisher extends Notifier {
         this.deployApp = deployApp;
         this.deployEnv = deployEnv;
         this.deployProc = deployProc;
+        this.properties = properties;
+        this.description = description;
     }
 
     public String getSiteName() {
@@ -129,6 +134,22 @@ public class UrbanDeployPublisher extends Notifier {
 
     public void setVersionName(String versionName) {
         this.versionName = versionName;
+    }
+    
+    public String getDescription() {
+        return description;
+    }
+    
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    public String getProperties() {
+        return properties;
+    }
+    
+    public void setProperties(String properties) {
+        this.properties = properties;
     }
 
     public void setSkip(boolean skip) {
@@ -212,10 +233,10 @@ public class UrbanDeployPublisher extends Notifier {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
             throws InterruptedException, IOException {
         if (isSkip()) {
-            listener.getLogger().println("Skip artifacts upload to UrbanDeploy - step disabled.");
+            listener.getLogger().println("Skip artifacts upload to uDeploy - step disabled.");
         }
         else if (build.getResult() == Result.FAILURE || build.getResult() == Result.ABORTED) {
-            listener.getLogger().println("Skip artifacts upload to UrbanDeploy - build failed or aborted.");
+            listener.getLogger().println("Skip artifacts upload to uDeploy - build failed or aborted.");
         }
         else {
             envMap = build.getEnvironment(listener);
@@ -229,14 +250,19 @@ public class UrbanDeployPublisher extends Notifier {
             String resolvedDeployApp = resolveVariables(getDeployApp());
             String resolvedDeployEnv = resolveVariables(getDeployEnv());
             String resolvedDeployProc = resolveVariables(getDeployProc());
+            String resolvedProperties = resolveVariables(getProperties());
+            String resolvedDescription = resolveVariables(getDescription());
 
             UrbanDeploySite udSite = getSite();
             try {
                 PublishArtifactsCallable task = new PublishArtifactsCallable(resolvedBaseDir, resolvedDirectoryOffset,
                         udSite, resolvedFileIncludePatterns, resolvedFileExcludePatterns, resolvedComponent,
-                        resolvedVersionName, listener);
+                        resolvedVersionName, resolvedDescription, listener);
                 launcher.getChannel().call(task);
 
+                PropsHelper propsHelper = new PropsHelper();
+                propsHelper.setComponentVersionProperties(udSite.getUrl(), resolvedComponent, resolvedVersionName, resolvedProperties, udSite.getUser(), udSite.getPassword(), listener);
+                
                 if (isDeploy()) {
                     if (resolvedDeployApp == null || resolvedDeployApp.trim().length() == 0) {
                         throw new Exception("Deploy Application is a required field if Deploy is selected!");

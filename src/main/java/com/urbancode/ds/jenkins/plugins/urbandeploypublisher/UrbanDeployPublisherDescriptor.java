@@ -37,7 +37,7 @@ public class UrbanDeployPublisherDescriptor extends BuildStepDescriptor<Publishe
      */
     @Override
     public String getDisplayName() {
-        return "Publish artifacts to UrbanDeploy";
+        return "Publish artifacts to uDeploy";
     }
 
     /**

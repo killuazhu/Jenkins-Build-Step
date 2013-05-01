@@ -179,10 +179,10 @@ public class UrbanDeploySite implements Serializable {
             int responseCode = httpClient.executeMethod(method);
             //if (responseCode < 200 || responseCode < 300) {
             if (responseCode == 401) {
-                throw new Exception("Error connecting to UrbanDeploy: Invalid user and/or password");
+                throw new Exception("Error connecting to uDeploy: Invalid user and/or password");
             }
             else if (responseCode != 200) {
-                throw new Exception("Error connecting to UrbanDeploy: " + responseCode);
+                throw new Exception("Error connecting to uDeploy: " + responseCode);
             }
             else {
                 result = method.getResponseBodyAsString();
@@ -220,14 +220,14 @@ public class UrbanDeploySite implements Serializable {
 
             //if (responseCode < 200 || responseCode < 300) {
             if (responseCode != 200 ) {
-                throw new Exception("UrbanDeploy returned error code: " + responseCode);
+                throw new Exception("uDeploy returned error code: " + responseCode);
             }
             else {
                 result = method.getResponseBodyAsString();
             }
         }
         catch (Exception e) {
-            throw new Exception("Error connecting to UrbanDeploy: " + e.getMessage());
+            throw new Exception("Error connecting to uDeploy: " + e.getMessage());
         }
         finally {
             method.releaseConnection();
@@ -259,14 +259,14 @@ public class UrbanDeploySite implements Serializable {
             int responseCode = httpClient.executeMethod(method);
 
             if (responseCode != 200 ) {
-                throw new Exception("UrbanDeploy returned error code: " + responseCode);
+                throw new Exception("uDeploy returned error code: " + responseCode);
             }
             else {
                 result = method.getResponseBodyAsString();
             }
         }
         catch (Exception e) {
-            throw new Exception("Error connecting to UrbanDeploy: " + e.getMessage());
+            throw new Exception("Error connecting to uDeploy: " + e.getMessage());
         }
         finally {
             method.releaseConnection();

@@ -23,6 +23,12 @@
       <f:entry title="Version" field="versionName" help="${helpURL}/help-versionname.html">
         <f:textbox default="${BUILD_NUMBER}"/>
       </f:entry>
+      <f:entry title="Version Description" field="description" help="${helpURL}/help-description.html">
+        <f:textbox/>
+      </f:entry>
+      <f:entry title="Version Properties" field="properties" help="${helpURL}/help-properties.html">
+        <f:textarea/>
+      </f:entry>
       <f:entry title="Include" field="fileIncludePatterns" help="${helpURL}/help-fileincludes.html">
         <f:textarea default="**/*"/>
       </f:entry>

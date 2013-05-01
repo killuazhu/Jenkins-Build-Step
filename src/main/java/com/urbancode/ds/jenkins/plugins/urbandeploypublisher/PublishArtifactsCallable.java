@@ -36,11 +36,12 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
     final private String resolvedFileExcludePatterns;
     final private String resolvedComponent;
     final private String resolvedVersionName;
+    final private String resolvedDescription;
     final private BuildListener listener;
     
     public PublishArtifactsCallable(String resolvedBaseDir, String resolvedDirectoryOffset, UrbanDeploySite udSite,
             String resolvedFileIncludePatterns, String resolvedFileExcludePatterns, String resolvedComponent,
-            String resolvedVersionName, BuildListener listener) {
+            String resolvedVersionName, String resolvedDescription, BuildListener listener) {
         this.resolvedBaseDir = resolvedBaseDir;
         this.resolvedDirectoryOffset = resolvedDirectoryOffset;
         this.udSite = udSite;
@@ -48,6 +49,7 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
         this.resolvedFileExcludePatterns = resolvedFileExcludePatterns;
         this.resolvedComponent = resolvedComponent;
         this.resolvedVersionName = resolvedVersionName;
+        this.resolvedDescription = resolvedDescription;
         this.listener = listener;
     }
     
@@ -84,7 +86,7 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
 
 
         listener.getLogger().println("Connecting to " + udSite.getUrl());
-        createComponentVersion(udSite, resolvedComponent, resolvedVersionName, listener);
+        createComponentVersion(udSite, resolvedComponent, resolvedVersionName, resolvedDescription, listener);
         listener.getLogger().println("Working Directory: " + workDir.getPath());
         listener.getLogger().println("Includes: " + resolvedFileIncludePatterns);
         listener.getLogger().println("Excludes: " + (resolvedFileExcludePatterns == null ? "" : resolvedFileExcludePatterns));
@@ -169,13 +171,14 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
     }
 
     private void createComponentVersion(UrbanDeploySite site, String componentName,
-            String versionName, BuildListener listener)
+            String versionName, String description, BuildListener listener)
     throws Exception {
         UriBuilder uriBuilder = UriBuilder.fromPath(site.getUrl()).path("cli").path("version")
                         .path("createVersion");
         
         uriBuilder.queryParam("component", componentName);
         uriBuilder.queryParam("name", versionName);
+        uriBuilder.queryParam("description", description);
         URI uri = uriBuilder.build();
         
         listener.getLogger().println("Creating new version \""+versionName+
