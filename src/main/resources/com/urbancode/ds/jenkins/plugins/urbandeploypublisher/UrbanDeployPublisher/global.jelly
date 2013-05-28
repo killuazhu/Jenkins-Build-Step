@@ -1,5 +1,5 @@
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
-  <j:set var="helpURL" value="/plugin/urbandeploypublisher"/>
+  <j:set var="helpURL" value="/plugin/udeploy-publisher"/>
 
   <f:section title="uDeploy Server">
     <f:entry title="">

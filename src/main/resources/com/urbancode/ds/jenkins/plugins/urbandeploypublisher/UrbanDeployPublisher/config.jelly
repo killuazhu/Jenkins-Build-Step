@@ -1,6 +1,6 @@
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
 
-  <j:set var="helpURL" value="/plugin/urbandeploypublisher"/>
+  <j:set var="helpURL" value="/plugin/udeploy-publisher"/>
 
   <f:entry>
     <table width="100%">
