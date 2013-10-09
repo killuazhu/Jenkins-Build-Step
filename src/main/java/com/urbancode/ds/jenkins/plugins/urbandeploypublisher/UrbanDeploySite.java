@@ -1,22 +1,23 @@
 package com.urbancode.ds.jenkins.plugins.urbandeploypublisher;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.io.Serializable;
 import java.net.URI;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.PutMethod;
-import org.apache.commons.httpclient.params.HttpClientParams;
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
 
-import com.urbancode.commons.util.https.OpenSSLProtocolSocketFactory;
+import com.urbancode.commons.httpcomponentsutil.HttpClientBuilder;
+import com.urbancode.commons.util.IO;
 
 public class UrbanDeploySite implements Serializable {
 
@@ -33,6 +34,8 @@ public class UrbanDeploySite implements Serializable {
 
 	/** The password. */
 	private String password;
+	
+	private HttpClient client;
 
 	/**
 	 * Instantiates a new UrbanDeploy site.
@@ -55,6 +58,21 @@ public class UrbanDeploySite implements Serializable {
 		this.url = url;
 		this.user = user;
 		this.password = password;
+
+	}
+	
+	public HttpClient getClient() {
+	    if (client == null) {
+	        HttpClientBuilder builder = new HttpClientBuilder();
+	        builder.setPreemptiveAuthentication(true);
+	        builder.setUsername(user);
+	        builder.setPassword(password);
+
+	        builder.setTrustAllCerts(true);
+
+	        this.client = builder.buildClient();
+	    }
+	    return client;
 	}
 
 
@@ -160,23 +178,11 @@ public class UrbanDeploySite implements Serializable {
 
     public String executeJSONGet(URI uri) throws Exception {
         String result = null;
-        HttpClient httpClient = new HttpClient();
-
-        if ("https".equalsIgnoreCase(uri.getScheme())) {
-            ProtocolSocketFactory socketFactory = new OpenSSLProtocolSocketFactory();
-            Protocol https = new Protocol("https", socketFactory, 443);
-            Protocol.registerProtocol("https", https);
-        }
-
-        GetMethod method = new GetMethod(uri.toString());
+        HttpClient client = getClient();
+        HttpGet method = new HttpGet(uri.toString());
         try {
-            HttpClientParams params = httpClient.getParams();
-            params.setAuthenticationPreemptive(true);
-
-            UsernamePasswordCredentials clientCredentials = new UsernamePasswordCredentials(user, password);
-            httpClient.getState().setCredentials(AuthScope.ANY, clientCredentials);
-
-            int responseCode = httpClient.executeMethod(method);
+            HttpResponse response = client.execute(method);
+            int responseCode = response.getStatusLine().getStatusCode();
             //if (responseCode < 200 || responseCode < 300) {
             if (responseCode == 401) {
                 throw new Exception("Error connecting to uDeploy: Invalid user and/or password");
@@ -185,7 +191,7 @@ public class UrbanDeploySite implements Serializable {
                 throw new Exception("Error connecting to uDeploy: " + responseCode);
             }
             else {
-                result = method.getResponseBodyAsString();
+                result = getBody(response);
             }
         }
         finally {
@@ -197,37 +203,24 @@ public class UrbanDeploySite implements Serializable {
 
     public String executeJSONPut(URI uri, String putContents) throws Exception {
         String result = null;
-        HttpClient httpClient = new HttpClient();
-
-        if ("https".equalsIgnoreCase(uri.getScheme())) {
-            ProtocolSocketFactory socketFactory = new OpenSSLProtocolSocketFactory();
-            Protocol https = new Protocol("https", socketFactory, 443);
-            Protocol.registerProtocol("https", https);
-        }
-
-        PutMethod method = new PutMethod(uri.toString());
-        method.setRequestBody(putContents);
-        method.setRequestHeader("Content-Type", "application/json");
-        method.setRequestHeader("charset", "utf-8");
+        
+        HttpPut method = new HttpPut(uri.toString());
+        HttpClient client = getClient();
+        StringEntity requestEntity = new StringEntity(putContents);
+        method.setEntity(requestEntity);
         try {
-            HttpClientParams params = httpClient.getParams();
-            params.setAuthenticationPreemptive(true);
-
-            UsernamePasswordCredentials clientCredentials = new UsernamePasswordCredentials(user, password);
-            httpClient.getState().setCredentials(AuthScope.ANY, clientCredentials);
-
-            int responseCode = httpClient.executeMethod(method);
-
+            HttpResponse response = client.execute(method);
+            int responseCode = response.getStatusLine().getStatusCode();
             //if (responseCode < 200 || responseCode < 300) {
-            if (responseCode != 200 ) {
-                throw new Exception("uDeploy returned error code: " + responseCode);
+            if (responseCode == 401) {
+                throw new Exception("Error connecting to uDeploy: Invalid user and/or password");
+            }
+            else if (responseCode != 200) {
+                throw new Exception("Error connecting to uDeploy: " + responseCode);
             }
             else {
-                result = method.getResponseBodyAsString();
+                result = getBody(response);
             }
-        }
-        catch (Exception e) {
-            throw new Exception("Error connecting to uDeploy: " + e.getMessage());
         }
         finally {
             method.releaseConnection();
@@ -238,40 +231,47 @@ public class UrbanDeploySite implements Serializable {
 
     public String executeJSONPost(URI uri) throws Exception {
         String result = null;
-        HttpClient httpClient = new HttpClient();
-
-        if ("https".equalsIgnoreCase(uri.getScheme())) {
-            ProtocolSocketFactory socketFactory = new OpenSSLProtocolSocketFactory();
-            Protocol https = new Protocol("https", socketFactory, 443);
-            Protocol.registerProtocol("https", https);
-        }
-
-        PostMethod method = new PostMethod(uri.toString());
         
-        method.setRequestHeader("charset", "utf-8");
+
+        HttpPost method = new HttpPost(uri.toString());
+        HttpClient client = getClient();
+        
+        method.setHeader("charset", "utf-8");
         try {
-            HttpClientParams params = httpClient.getParams();
-            params.setAuthenticationPreemptive(true);
-
-            UsernamePasswordCredentials clientCredentials = new UsernamePasswordCredentials(user, password);
-            httpClient.getState().setCredentials(AuthScope.ANY, clientCredentials);
-
-            int responseCode = httpClient.executeMethod(method);
-
-            if (responseCode != 200 ) {
-                throw new Exception("uDeploy returned error code: " + responseCode);
+            
+            HttpResponse response = client.execute(method);
+            int responseCode = response.getStatusLine().getStatusCode();
+            //if (responseCode < 200 || responseCode < 300) {
+            if (responseCode == 401) {
+                throw new Exception("Error connecting to uDeploy: Invalid user and/or password");
+            }
+            else if (responseCode != 200) {
+                throw new Exception("Error connecting to uDeploy: " + responseCode);
             }
             else {
-                result = method.getResponseBodyAsString();
+                result = getBody(response);
             }
-        }
-        catch (Exception e) {
-            throw new Exception("Error connecting to uDeploy: " + e.getMessage());
         }
         finally {
             method.releaseConnection();
         }
 
         return result;
+    }
+    
+    protected String getBody(HttpResponse response)
+    throws IOException {
+        StringBuilder builder = new StringBuilder();
+        InputStream body = response.getEntity().getContent();
+        if (body != null) {
+            Reader reader = IO.reader(body, IO.utf8());
+            try {
+                IO.copy(reader, builder);
+            }
+            finally {
+                reader.close();
+            }
+        }
+        return builder.toString();
     }
 }
