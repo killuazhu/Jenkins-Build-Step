@@ -87,7 +87,6 @@
             description="Resolve all dependencies">
             <mkdir dir="${lib.dir}"/>
         <codestation:resolve
-            server="anthill3.urbancode.com"
             buildLife="${build.life.id}"
             xmlFile="dependencies.xml" />
     </target>
