@@ -185,10 +185,10 @@ public class UrbanDeploySite implements Serializable {
             int responseCode = response.getStatusLine().getStatusCode();
             //if (responseCode < 200 || responseCode < 300) {
             if (responseCode == 401) {
-                throw new Exception("Error connecting to uDeploy: Invalid user and/or password");
+                throw new Exception("Error connecting to IBM UrbanCode Deploy: Invalid user and/or password");
             }
             else if (responseCode != 200) {
-                throw new Exception("Error connecting to uDeploy: " + responseCode);
+                throw new Exception("Error connecting to IBM UrbanCode Deploy: " + responseCode);
             }
             else {
                 result = getBody(response);
@@ -213,10 +213,10 @@ public class UrbanDeploySite implements Serializable {
             int responseCode = response.getStatusLine().getStatusCode();
             //if (responseCode < 200 || responseCode < 300) {
             if (responseCode == 401) {
-                throw new Exception("Error connecting to uDeploy: Invalid user and/or password");
+                throw new Exception("Error connecting to IBM UrbanCode Deploy: Invalid user and/or password");
             }
             else if (responseCode != 200) {
-                throw new Exception("Error connecting to uDeploy: " + responseCode);
+                throw new Exception("Error connecting to IBM UrbanCode Deploy: " + responseCode);
             }
             else {
                 result = getBody(response);
@@ -243,10 +243,10 @@ public class UrbanDeploySite implements Serializable {
             int responseCode = response.getStatusLine().getStatusCode();
             //if (responseCode < 200 || responseCode < 300) {
             if (responseCode == 401) {
-                throw new Exception("Error connecting to uDeploy: Invalid user and/or password");
+                throw new Exception("Error connecting to IBM UrbanCode Deploy: Invalid user and/or password");
             }
             else if (responseCode != 200) {
-                throw new Exception("Error connecting to uDeploy: " + responseCode);
+                throw new Exception("Error connecting to IBM UrbanCode Deploy: " + responseCode);
             }
             else {
                 result = getBody(response);

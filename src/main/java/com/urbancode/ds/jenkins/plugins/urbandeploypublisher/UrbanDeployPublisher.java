@@ -233,10 +233,10 @@ public class UrbanDeployPublisher extends Notifier {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
             throws InterruptedException, IOException {
         if (isSkip()) {
-            listener.getLogger().println("Skip artifacts upload to uDeploy - step disabled.");
+            listener.getLogger().println("Skip artifacts upload to IBM UrbanCode Deploy - step disabled.");
         }
         else if (build.getResult() == Result.FAILURE || build.getResult() == Result.ABORTED) {
-            listener.getLogger().println("Skip artifacts upload to uDeploy - build failed or aborted.");
+            listener.getLogger().println("Skip artifacts upload to IBM UrbanCode Deploy - build failed or aborted.");
         }
         else {
             envMap = build.getEnvironment(listener);

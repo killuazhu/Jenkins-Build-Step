@@ -37,7 +37,7 @@ public class UrbanDeployPublisherDescriptor extends BuildStepDescriptor<Publishe
      */
     @Override
     public String getDisplayName() {
-        return "Publish artifacts to uDeploy";
+        return "Publish artifacts to IBM UrbanCode Deploy";
     }
 
     /**
@@ -50,7 +50,7 @@ public class UrbanDeployPublisherDescriptor extends BuildStepDescriptor<Publishe
      */
     @Override
     public String getHelpFile() {
-        return "/plugin/urbandeploypublisher/help.html";
+        return "/plugin/ibm-ucdeploy-publisher/help.html";
     }
 
     @Override

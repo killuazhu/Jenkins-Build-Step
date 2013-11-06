@@ -1,14 +1,14 @@
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
-  <j:set var="helpURL" value="/plugin/udeploy-publisher"/>
+  <j:set var="helpURL" value="/plugin/ibm-ucdeploy-publisher"/>
 
-  <f:section title="uDeploy Server">
+  <f:section title="IBM UrbanCode Deploy Server">
     <f:entry title="">
       <f:repeatable var="site" items="${descriptor.sites}">
         <table width="100%">
           <f:entry title="Profile Name" help="${helpURL}/help-profile.html">
             <f:textbox name="ud.profileName" value="${site.profileName}"/>
           </f:entry>
-          <f:entry title="uDeploy URL" help="${helpURL}/help-url.html">
+          <f:entry title="IBM UrbanCode Deploy URL" help="${helpURL}/help-url.html">
             <f:textbox name="ud.url" value="${site.url}"/>
           </f:entry>
 
