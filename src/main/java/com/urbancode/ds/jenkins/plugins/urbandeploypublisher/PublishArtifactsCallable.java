@@ -120,7 +120,7 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
                 listener.getLogger().println("Created change set: " + changeSetId);
     
                 listener.getLogger().println("Labeling change set with label: " + resolvedVersionName);
-                client.labelChangeSet(repositoryId, URLDecoder.decode(changeSetId, "UTF-8"), resolvedVersionName,
+                client.labelChangeSet(repositoryId, changeSetId, resolvedVersionName,
                 udSite.getUser(), "Associated with version " + resolvedVersionName);
                 listener.getLogger().println("Done labeling change set!");
                 //staging directory get deleted in labelChangeSet call
