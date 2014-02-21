@@ -5,7 +5,7 @@
     <!-- MAIN -->
     <dependency>
       <ah-project name="Versioned File Storage"
-                  workflow="build workflow [master]"/>
+                  workflow="build workflow [active-active]"/>
       <criteria status="success"/>
       <delivery artifact-set="Client All">
         <directory>lib</directory>
