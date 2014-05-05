@@ -4,15 +4,6 @@
   <dependencies conflictStrategy="FAIL">
     <!-- MAIN -->
     <dependency>
-      <ah-project name="Versioned File Storage"
-                  workflow="build workflow [active-active]"/>
-      <criteria status="success"/>
-      <delivery artifact-set="Client All">
-        <directory>lib</directory>
-      </delivery>
-    </dependency>
-    
-    <dependency>
       <cs-project name="Jakarta Commons Logging"/>
       <criteria stamp="1.1"/>
       <delivery artifact-set="Default">
@@ -20,22 +11,94 @@
       </delivery>
     </dependency>
     
-        <dependency>
+    <dependency>
       <cs-project name="Jakarta Commons Codec"/>
       <criteria status="success"/>
       <delivery artifact-set="Default">
         <directory>lib</directory>
       </delivery>
     </dependency>
+
+    <dependency>
+      <cs-project name="Jakarta Commons Compress"/>
+      <criteria stamp="1.1"/>
+      <delivery artifact-set="Runtime Libraries">
+        <directory>lib</directory>
+      </delivery>
+    </dependency>
     
     <dependency>
-      <cs-project name="Apache HttpComponents"/>
-      <criteria stamp="4.2.1"/>
-      <delivery artifact-set="lib">
+      <cs-project name='Apache HttpComponents' />
+      <criteria stamp='4.2.1' status='success' />
+      <delivery artifact-set='lib'>
+        <directory>lib</directory>
+      </delivery>
+    </dependency>
+    
+    <dependency>
+      <cs-project name="Apache-log4j"/>
+      <criteria stamp="1.2.16" />
+      <delivery artifact-set="Default">
         <directory>lib</directory>
       </delivery>
     </dependency>
 
+    <dependency>
+      <cs-project name="Jersey" />
+      <criteria stamp="1.12-IBM-Jackson-1.9.13" />
+      <delivery artifact-set="Runtime Libraries">
+        <directory>lib</directory>
+      </delivery>
+    </dependency>
+
+    <dependency>
+      <ah-project name="Commons-Util" workflow="build workflow [master]"/>
+      <criteria status="success"/>
+      <delivery artifact-set="Library">
+        <directory>lib</directory>
+      </delivery>
+    </dependency>
+
+    <dependency>
+      <ah-project name="Commons-FileUtils" workflow="build workflow [master]"/>
+      <criteria status="success"/>
+      <delivery artifact-set="Default">
+        <directory>lib</directory>
+      </delivery>
+    </dependency>
+
+    <dependency>
+      <ah-project name='HttpComponents-Util' workflow='build workflow [master]' />
+      <criteria status='success' />
+      <delivery artifact-set='Library'>
+        <directory>lib</directory>
+      </delivery>
+    </dependency>
+
+    <dependency>
+      <ah-project name="codestation-aggregate" workflow="build workflow [master]"/>
+      <criteria status="success"/>
+      <delivery artifact-set="Dist">
+        <directory>lib</directory>
+      </delivery>
+    </dependency>
+    
+    <dependency>
+      <ah-project name='replicated-codestation' workflow='build workflow [master]' />
+      <criteria status='success' />
+      <delivery artifact-set='Dist'>
+        <directory>lib</directory>
+      </delivery>
+    </dependency>
+    
+    <dependency>
+      <cs-project name="Apache-Commons-Lang3" />
+      <criteria stamp="3.*" status="success" />
+      <delivery artifact-set="Default">
+        <directory>lib</directory>
+      </delivery>
+    </dependency>
+    
     <!-- TEST -->
   </dependencies>
 </project>

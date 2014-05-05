@@ -11,6 +11,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -34,7 +35,7 @@ public class UrbanDeploySite implements Serializable {
 
 	/** The password. */
 	private String password;
-	
+
 	private HttpClient client;
 
 	/**
@@ -52,7 +53,7 @@ public class UrbanDeploySite implements Serializable {
 	 public UrbanDeploySite() {
 
 	}
-	 
+
 	public UrbanDeploySite(String profileName, String url, String user, String password) {
 		this.profileName = profileName;
 		this.url = url;
@@ -60,7 +61,7 @@ public class UrbanDeploySite implements Serializable {
 		this.password = password;
 
 	}
-	
+
 	public HttpClient getClient() {
 	    if (client == null) {
 	        HttpClientBuilder builder = new HttpClientBuilder();
@@ -70,7 +71,7 @@ public class UrbanDeploySite implements Serializable {
 
 	        builder.setTrustAllCerts(true);
 
-	        this.client = builder.buildClient();
+	        client = builder.buildClient();
 	    }
 	    return client;
 	}
@@ -201,9 +202,33 @@ public class UrbanDeploySite implements Serializable {
         return result;
     }
 
+    public String executeJSONDelete(URI uri) throws Exception {
+        String result = null;
+        HttpClient client = getClient();
+        HttpDelete method = new HttpDelete(uri.toString());
+        try {
+            HttpResponse response = client.execute(method);
+            int responseCode = response.getStatusLine().getStatusCode();
+            if (responseCode == 401) {
+                throw new Exception("Error connecting to IBM UrbanCode Deploy: Invalid user and/or password");
+            }
+            else if (responseCode != 200) {
+                throw new Exception("Error connecting to IBM UrbanCode Deploy: " + responseCode);
+            }
+            else {
+                result = getBody(response);
+            }
+        }
+        finally {
+            method.releaseConnection();
+        }
+
+        return result;
+    }
+
     public String executeJSONPut(URI uri, String putContents) throws Exception {
         String result = null;
-        
+
         HttpPut method = new HttpPut(uri.toString());
         HttpClient client = getClient();
         StringEntity requestEntity = new StringEntity(putContents);
@@ -231,14 +256,14 @@ public class UrbanDeploySite implements Serializable {
 
     public String executeJSONPost(URI uri) throws Exception {
         String result = null;
-        
+
 
         HttpPost method = new HttpPost(uri.toString());
         HttpClient client = getClient();
-        
+
         method.setHeader("charset", "utf-8");
         try {
-            
+
             HttpResponse response = client.execute(method);
             int responseCode = response.getStatusLine().getStatusCode();
             //if (responseCode < 200 || responseCode < 300) {
@@ -258,7 +283,7 @@ public class UrbanDeploySite implements Serializable {
 
         return result;
     }
-    
+
     protected String getBody(HttpResponse response)
     throws IOException {
         StringBuilder builder = new StringBuilder();

@@ -5,19 +5,19 @@ import hudson.remoting.Callable;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 
-import com.urbancode.commons.fileutils.filelister.FileListerBuilder;
-import com.urbancode.vfs.client.Client;
-import com.urbancode.vfs.common.ClientChangeSet;
-import com.urbancode.vfs.common.ClientPathEntry;
+import com.ibm.uclab.csrepl.client.CodestationClient;
+import com.ibm.uclab.csrepl.client.ops.Upload;
+import com.ibm.uclab.csrepl.http.HttpClientWrapper;
+import com.urbancode.commons.httpcomponentsutil.HttpClientBuilder;
 
 public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
 
@@ -38,10 +38,25 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
     final private String resolvedVersionName;
     final private String resolvedDescription;
     final private BuildListener listener;
-    
-    public PublishArtifactsCallable(String resolvedBaseDir, String resolvedDirectoryOffset, UrbanDeploySite udSite,
-            String resolvedFileIncludePatterns, String resolvedFileExcludePatterns, String resolvedComponent,
-            String resolvedVersionName, String resolvedDescription, BuildListener listener) {
+
+    public PublishArtifactsCallable(
+        String resolvedBaseDir,
+        String resolvedDirectoryOffset,
+        UrbanDeploySite udSite,
+        String resolvedFileIncludePatterns,
+        String resolvedFileExcludePatterns,
+        String resolvedComponent,
+        String resolvedVersionName,
+        String resolvedDescription,
+        BuildListener listener)
+    {
+        if (resolvedFileIncludePatterns == null) {
+            resolvedFileIncludePatterns = "";
+        }
+        if (resolvedFileExcludePatterns == null) {
+            resolvedFileExcludePatterns = "";
+        }
+
         this.resolvedBaseDir = resolvedBaseDir;
         this.resolvedDirectoryOffset = resolvedDirectoryOffset;
         this.udSite = udSite;
@@ -52,138 +67,110 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
         this.resolvedDescription = resolvedDescription;
         this.listener = listener;
     }
-    
-    
+
+
     @Override
     public Boolean call() throws Exception {
         File workDir = new File(resolvedBaseDir);
-        if (!workDir.exists()) throw new Exception("Base artifact directory " + workDir.toString()
-                + " does not exist!");
+        if (!workDir.exists()) {
+            throw new Exception(
+                "Base artifact directory " + workDir.getAbsolutePath() + " does not exist!");
+        }
         if (resolvedDirectoryOffset != null && resolvedDirectoryOffset.trim().length() > 0) {
             workDir = new File(workDir, resolvedDirectoryOffset.trim());
         }
 
-        Set<String> includesSet = new HashSet<String>();
-        Set<String> excludesSet = new HashSet<String>();
+        Set<String> includes = new HashSet<String>();
+        Set<String> excludes = new HashSet<String>();
         for (String pattern : resolvedFileIncludePatterns.split("\n")) {
             if (pattern != null && pattern.trim().length() > 0) {
-                includesSet.add(pattern.trim());
+                includes.add(pattern.trim());
             }
         }
-        if (resolvedFileExcludePatterns != null) {
-            for (String pattern : resolvedFileExcludePatterns.split("\n")) {
-                if (pattern != null && pattern.trim().length() > 0) {
-                    excludesSet.add(pattern.trim());
-                }
+        for (String pattern : resolvedFileExcludePatterns.split("\n")) {
+            if (pattern != null && pattern.trim().length() > 0) {
+                excludes.add(pattern.trim());
             }
         }
-
-        String[] includesArray = new String[includesSet.size()];
-        includesArray = (String[]) includesSet.toArray(includesArray);
-
-        String[] excludesArray = new String[excludesSet.size()];
-        excludesArray = (String[]) excludesSet.toArray(excludesArray);
-
 
         listener.getLogger().println("Connecting to " + udSite.getUrl());
-        createComponentVersion(udSite, resolvedComponent, resolvedVersionName, resolvedDescription, listener);
-        listener.getLogger().println("Working Directory: " + workDir.getPath());
-        listener.getLogger().println("Includes: " + resolvedFileIncludePatterns);
-        listener.getLogger().println("Excludes: " + (resolvedFileExcludePatterns == null ? "" : resolvedFileExcludePatterns));
-
-        Client client = null;
-        String stageId = null;
+        boolean ok = false;
+        UUID artifactSetId = createComponentVersion();
         try {
-            ClientPathEntry[] entries = ClientPathEntry
-                    .createPathEntriesFromFileSystem(workDir, includesArray, excludesArray,
-                            FileListerBuilder.Directories.INCLUDE_ALL, FileListerBuilder.Permissions.BEST_EFFORT,
-                            FileListerBuilder.Symlinks.AS_LINK, "SHA-256");
-            listener.getLogger().println("Invoke vfs client...");
-            client = new Client(udSite.getUrl() + "/vfs", null, null);
-            stageId = client.createStagingDirectory();
-            listener.getLogger().println("Created staging directory: " + stageId);
-    
-            if (entries.length > 0) {
-    
-                for (ClientPathEntry entry : entries) {
-                    File entryFile = new File(workDir, entry.getPath());
-                    listener.getLogger().println("Adding " + entry.getPath() + " to staging directory...");
-                    client.addFileToStagingDirectory(stageId, entry.getPath(), entryFile);
-                }
-    
-                String repositoryId = getComponentRepositoryId(udSite, resolvedComponent);
-                ClientChangeSet changeSet =
-                        ClientChangeSet.newChangeSet(repositoryId, udSite.getUser(), "Uploaded by Jenkins", entries);
-    
-                listener.getLogger().println("Committing change set...");
-                String changeSetId = client.commitStagingDirectory(stageId, changeSet);
-                listener.getLogger().println("Created change set: " + changeSetId);
-    
-                listener.getLogger().println("Labeling change set with label: " + resolvedVersionName);
-                client.labelChangeSet(repositoryId, changeSetId, resolvedVersionName,
-                udSite.getUser(), "Associated with version " + resolvedVersionName);
-                listener.getLogger().println("Done labeling change set!");
-                //staging directory get deleted in labelChangeSet call
-                listener.getLogger().println("Deleted staging directory: " + stageId);
-            }
-            else {
-                listener.getLogger().println("Did not find any files to upload!");
-            }
-        }
-        catch (Throwable e) {
-            if (client != null && stageId != null) {
+            listener.getLogger().println("Working Directory: " + workDir.getPath());
+            listener.getLogger().println("Includes: " + resolvedFileIncludePatterns);
+            listener.getLogger().println("Excludes: " + resolvedFileExcludePatterns);
+
+            HttpClientBuilder builder = new HttpClientBuilder();
+            builder.setUsername(udSite.getUser());
+            builder.setPassword(udSite.getPassword());
+            builder.setTrustAllCerts(true);
+            builder.setPreemptiveAuthentication(true);
+            HttpClientWrapper wrapper = new HttpClientWrapper(builder.buildClient());
+            CodestationClient client = new CodestationClient(udSite.getUrl(), wrapper);
+
+            client.start();
+            try {
+                Upload up = new Upload(client, workDir, artifactSetId);
+                up.setMessageStream(listener.getLogger());
+                up.setIncludes(new ArrayList<String>(includes));
+                up.setExcludes(new ArrayList<String>(excludes));
+                up.setSaveExecuteBits(true);
                 try {
-                    client.deleteStagingDirectory(stageId);
-                    listener.getLogger().println("Deleted staging directory: " + stageId);
+                    up.run();
                 }
-                catch (Exception ex) {
-                    listener.getLogger()
-                            .println("Failed to delete staging directory " + stageId + ": " + ex.getMessage());
+                catch (Throwable e) {
+                    throw new Exception("Failed to upload files", e);
                 }
             }
-            throw new Exception("Failed to upload files", e);
+            finally {
+                client.stop();
+            }
+            ok = true;
         }
+        finally {
+            if (!ok) {
+                try {
+                    deleteComponentVersion(artifactSetId);
+                }
+                catch (Throwable t) {
+                    listener.getLogger().println("Deletion failed");
+                    t.printStackTrace(listener.getLogger());
+                }
+            }
+        }
+
         return true;
     }
 
-    private String getComponentRepositoryId(UrbanDeploySite site, String componentName)
-            throws Exception {
-        String result = null;
-        URI uri = UriBuilder.fromPath(site.getUrl()).path("rest").path("deploy").path("component").path(componentName)
-                .build();
+    private UUID createComponentVersion()
+    throws Exception {
+        UriBuilder uriBuilder = UriBuilder.fromPath(udSite.getUrl()).path("cli").path("version")
+                        .path("createVersion");
 
-        String componentContent = site.executeJSONGet(uri);
+        uriBuilder.queryParam("component", resolvedComponent);
+        uriBuilder.queryParam("name", resolvedVersionName);
+        uriBuilder.queryParam("description", resolvedDescription);
+        URI uri = uriBuilder.build();
 
-        JSONArray properties = new JSONObject(componentContent).getJSONArray("properties");
-        if (properties != null) {
-            for (int i = 0; i < properties.length(); i++) {
-                JSONObject propertyJson = properties.getJSONObject(i);
-                String propName = propertyJson.getString("name");
-                String propValue = propertyJson.getString("value");
-
-                if ("code_station/repository".equalsIgnoreCase(propName)) {
-                    result = propValue.trim();
-                    break;
-                }
-            }
-        }
-        return result;
+        listener.getLogger().println("Creating new version \""+resolvedVersionName+
+                "\" on component "+resolvedComponent+"...");
+        JSONObject jversion = new JSONObject(udSite.executeJSONPost(uri));
+        UUID id = UUID.fromString(jversion.getString("id"));
+        listener.getLogger().println("Successfully created new component version.");
+        return id;
     }
 
-    private void createComponentVersion(UrbanDeploySite site, String componentName,
-            String versionName, String description, BuildListener listener)
+    private void deleteComponentVersion(UUID id)
     throws Exception {
-        UriBuilder uriBuilder = UriBuilder.fromPath(site.getUrl()).path("cli").path("version")
-                        .path("createVersion");
-        
-        uriBuilder.queryParam("component", componentName);
-        uriBuilder.queryParam("name", versionName);
-        uriBuilder.queryParam("description", description);
+        UriBuilder uriBuilder = UriBuilder.fromPath(udSite.getUrl())
+            .path("rest")
+            .path("deploy")
+            .path("version")
+            .path(id.toString());
         URI uri = uriBuilder.build();
-        
-        listener.getLogger().println("Creating new version \""+versionName+
-                "\" on component "+componentName+"...");
-        site.executeJSONPost(uri);
-        listener.getLogger().println("Successfully created new component version.");
+        listener.getLogger().println("Deleting version " + id + "...");
+        udSite.executeJSONDelete(uri);
+        listener.getLogger().println("Successfully deleted version.");
     }
 }

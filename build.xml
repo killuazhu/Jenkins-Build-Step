@@ -103,12 +103,83 @@
          COMPILE
          ================================================================== -->
     <target name="prepare" depends="resolve">
-
         <exec executable="${mvn}" osfamily="unix">
           <arg value="install:install-file"/>
-          <arg value="-Dfile=lib/urbancode-vfs-client-all.jar"/>
-          <arg value="-DgroupId=com.urbancode.vfs"/>
-          <arg value="-DartifactId=vfsclient"/>
+          <arg value="-Dfile=lib/codestation-aggregate.jar"/>
+          <arg value="-DgroupId=uc-codestation-aggregate"/>
+          <arg value="-DartifactId=uc-codestation-aggregate"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}" osfamily="unix">
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/replicated-codestation.jar"/>
+          <arg value="-DgroupId=uc-replicated-codestation"/>
+          <arg value="-DartifactId=uc-replicated-codestation"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}" osfamily="unix">
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/CommonsUtil.jar"/>
+          <arg value="-DgroupId=uc-commons-util"/>
+          <arg value="-DartifactId=uc-commons-util"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}" osfamily="unix">
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/CommonsFileUtils.jar"/>
+          <arg value="-DgroupId=uc-commons-fileutils"/>
+          <arg value="-DartifactId=uc-commons-fileutils"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}" osfamily="unix">
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/HttpComponents-Util.jar"/>
+          <arg value="-DgroupId=uc-httpcomponents-util"/>
+          <arg value="-DartifactId=uc-httpcomponents-util"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}" osfamily="unix">
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/jersey-core-1.12.jar"/>
+          <arg value="-DgroupId=uc-jersey-core"/>
+          <arg value="-DartifactId=uc-jersey-core"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}" osfamily="unix">
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/jersey-client-1.12.jar"/>
+          <arg value="-DgroupId=uc-jersey-client"/>
+          <arg value="-DartifactId=uc-jersey-client"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}" osfamily="unix">
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/jsr311-api-1.1.1.jar"/>
+          <arg value="-DgroupId=uc-jsr311-api"/>
+          <arg value="-DartifactId=uc-jsr311-api"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}" osfamily="unix">
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/jettison-1.1.jar"/>
+          <arg value="-DgroupId=uc-jettison"/>
+          <arg value="-DartifactId=uc-jettison"/>
           <arg value="-Dversion=1.0-SNAPSHOT"/>
           <arg value="-Dpackaging=jar"/>
           <arg value="-DgeneratePom=true"/>
