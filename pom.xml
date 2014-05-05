@@ -10,9 +10,9 @@
   <name>IBM UrbanCode Deploy Plugin</name>
   <groupId>com.urbancode.ds.jenkins.plugins</groupId>
   <artifactId>ibm-ucdeploy-publisher</artifactId>
-  <version>1.0.1</version>
+  <version>1.1.0</version>
   <packaging>hpi</packaging>
-  <url>http://plugins.urbancode.com/IBMUrbanCodeDeploy/plugin/Jenkins/1.0.1</url>
+  <url>http://plugins.urbancode.com/IBMUrbanCodeDeploy/plugin/Jenkins/1.1.0</url>
 
   <!-- get every artifact through maven.glassfish.org, which proxies all the artifacts that we need -->
   <repositories>

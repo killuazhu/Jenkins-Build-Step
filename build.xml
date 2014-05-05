@@ -103,7 +103,7 @@
          COMPILE
          ================================================================== -->
     <target name="prepare" depends="resolve">
-        <exec executable="${mvn}" osfamily="unix">
+        <exec executable="${mvn}">
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/codestation-aggregate.jar"/>
           <arg value="-DgroupId=uc-codestation-aggregate"/>
@@ -112,7 +112,7 @@
           <arg value="-Dpackaging=jar"/>
           <arg value="-DgeneratePom=true"/>
         </exec>
-        <exec executable="${mvn}" osfamily="unix">
+        <exec executable="${mvn}">
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/replicated-codestation.jar"/>
           <arg value="-DgroupId=uc-replicated-codestation"/>
@@ -121,7 +121,7 @@
           <arg value="-Dpackaging=jar"/>
           <arg value="-DgeneratePom=true"/>
         </exec>
-        <exec executable="${mvn}" osfamily="unix">
+        <exec executable="${mvn}">
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/CommonsUtil.jar"/>
           <arg value="-DgroupId=uc-commons-util"/>
@@ -130,7 +130,7 @@
           <arg value="-Dpackaging=jar"/>
           <arg value="-DgeneratePom=true"/>
         </exec>
-        <exec executable="${mvn}" osfamily="unix">
+        <exec executable="${mvn}">
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/CommonsFileUtils.jar"/>
           <arg value="-DgroupId=uc-commons-fileutils"/>
@@ -139,7 +139,7 @@
           <arg value="-Dpackaging=jar"/>
           <arg value="-DgeneratePom=true"/>
         </exec>
-        <exec executable="${mvn}" osfamily="unix">
+        <exec executable="${mvn}">
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/HttpComponents-Util.jar"/>
           <arg value="-DgroupId=uc-httpcomponents-util"/>
@@ -148,7 +148,7 @@
           <arg value="-Dpackaging=jar"/>
           <arg value="-DgeneratePom=true"/>
         </exec>
-        <exec executable="${mvn}" osfamily="unix">
+        <exec executable="${mvn}">
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/jersey-core-1.12.jar"/>
           <arg value="-DgroupId=uc-jersey-core"/>
@@ -157,7 +157,7 @@
           <arg value="-Dpackaging=jar"/>
           <arg value="-DgeneratePom=true"/>
         </exec>
-        <exec executable="${mvn}" osfamily="unix">
+        <exec executable="${mvn}">
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/jersey-client-1.12.jar"/>
           <arg value="-DgroupId=uc-jersey-client"/>
@@ -166,7 +166,7 @@
           <arg value="-Dpackaging=jar"/>
           <arg value="-DgeneratePom=true"/>
         </exec>
-        <exec executable="${mvn}" osfamily="unix">
+        <exec executable="${mvn}">
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/jsr311-api-1.1.1.jar"/>
           <arg value="-DgroupId=uc-jsr311-api"/>
@@ -175,7 +175,7 @@
           <arg value="-Dpackaging=jar"/>
           <arg value="-DgeneratePom=true"/>
         </exec>
-        <exec executable="${mvn}" osfamily="unix">
+        <exec executable="${mvn}">
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/jettison-1.1.jar"/>
           <arg value="-DgroupId=uc-jettison"/>
