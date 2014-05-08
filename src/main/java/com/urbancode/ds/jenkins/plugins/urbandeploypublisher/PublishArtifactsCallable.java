@@ -107,6 +107,7 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
             builder.setTrustAllCerts(true);
             builder.setPreemptiveAuthentication(true);
             HttpClientWrapper wrapper = new HttpClientWrapper(builder.buildClient());
+            wrapper.setTimeout(60 * 1000, 5 * 60 * 1000);
             CodestationClient client = new CodestationClient(udSite.getUrl(), wrapper);
 
             client.start();
