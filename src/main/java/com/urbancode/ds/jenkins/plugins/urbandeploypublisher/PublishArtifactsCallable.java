@@ -68,8 +68,6 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
         this.listener = listener;
     }
 
-
-    @Override
     public Boolean call() throws Exception {
         File workDir = new File(resolvedBaseDir);
         if (!workDir.exists()) {

@@ -11,6 +11,15 @@
           </j:forEach>
         </select>
       </f:entry>
+      <f:entry title="Use Another User" field="useAnotherUser">
+        <f:checkbox/>
+      </f:entry>
+      <f:entry title="User Name" field="anotherUser" help="${helpURL}/help-user.html">
+        <f:textbox/>
+      </f:entry>
+      <f:entry title="User Password" field="anotherPassword" help="${helpURL}/help-password.html">
+        <f:password/>
+      </f:entry>
       <f:entry title="Component" field="component" help="${helpURL}/help-component.html">
         <f:textbox/>
       </f:entry>

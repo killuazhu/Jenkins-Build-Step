@@ -36,7 +36,7 @@ public class UrbanDeploySite implements Serializable {
 	/** The password. */
 	private String password;
 
-	private HttpClient client;
+	transient private HttpClient client;
 
 	/**
 	 * Instantiates a new UrbanDeploy site.
@@ -189,7 +189,7 @@ public class UrbanDeploySite implements Serializable {
                 throw new Exception("Error connecting to IBM UrbanCode Deploy: Invalid user and/or password");
             }
             else if (responseCode != 200) {
-                throw new Exception("Error connecting to IBM UrbanCode Deploy: " + responseCode);
+                throw new Exception("Error connecting to IBM UrbanCode Deploy: " + responseCode + "using URI: " + uri.toString());
             }
             else {
                 result = getBody(response);
