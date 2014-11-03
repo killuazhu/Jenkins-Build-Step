@@ -76,7 +76,6 @@ public class UrbanDeploySite implements Serializable {
 	    return client;
 	}
 
-
 	/**
 	 * Gets the display name.
 	 *
@@ -236,11 +235,10 @@ public class UrbanDeploySite implements Serializable {
         try {
             HttpResponse response = client.execute(method);
             int responseCode = response.getStatusLine().getStatusCode();
-            //if (responseCode < 200 || responseCode < 300) {
             if (responseCode == 401) {
                 throw new Exception("Error connecting to IBM UrbanCode Deploy: Invalid user and/or password");
             }
-            else if (responseCode != 200) {
+            else if (responseCode != 200 && responseCode != 204) {
                 throw new Exception("Error connecting to IBM UrbanCode Deploy: " + responseCode);
             }
             else {
@@ -287,16 +285,19 @@ public class UrbanDeploySite implements Serializable {
     protected String getBody(HttpResponse response)
     throws IOException {
         StringBuilder builder = new StringBuilder();
-        InputStream body = response.getEntity().getContent();
-        if (body != null) {
-            Reader reader = IO.reader(body, IO.utf8());
-            try {
-                IO.copy(reader, builder);
+        if(response != null && response.getEntity() != null){
+        	InputStream body = response.getEntity().getContent();
+            if (body != null) {
+                Reader reader = IO.reader(body, IO.utf8());
+                try {
+                    IO.copy(reader, builder);
+                }
+                finally {
+                    reader.close();
+                }
             }
-            finally {
-                reader.close();
-            }
+            return builder.toString();
         }
-        return builder.toString();
+        return "";
     }
 }

@@ -5,6 +5,7 @@ import hudson.Launcher;
 import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.model.AbstractBuild;
+import hudson.model.Hudson;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 
@@ -315,7 +316,11 @@ public class UrbanDeployPublisher extends Notifier {
 
                     PropsHelper propsHelper = new PropsHelper();
                     propsHelper.setComponentVersionProperties(udSite.getUrl(), resolvedComponent, resolvedVersionName, 
-                    							resolvedProperties, udSite.getUser(), udSite.getPassword(), listener);                 
+                    							resolvedProperties, udSite.getUser(), udSite.getPassword(), listener); 
+                    String linkName = "Jenkins Job " + build.getDisplayName();
+                    String linkUrl = Hudson.getInstance().getRootUrl() + build.getUrl() ;
+                	listener.getLogger().println("Add Jenkins job link " + linkUrl );
+                    this.addLinkToComp(udSite, resolvedComponent, resolvedVersionName, linkName, linkUrl);                  
                 }catch (Throwable th) {
                     th.printStackTrace(listener.error("Failed to upload files" + th));
                     build.setResult(Result.UNSTABLE);
@@ -344,7 +349,7 @@ public class UrbanDeployPublisher extends Notifier {
                       
                       result = createDefaultProcessRequest(udSite, resolvedDeployApp, resolvedDeployEnv, resolvedDeployProc, listener);                  	 
                       
-                      listener.getLogger().println("Deployment result is: " + result);
+                      listener.getLogger().println("Deployment request id is: " + result);
                       if(result.contains("requestId")){
                       	result = result.substring(result.indexOf("\"") + 12).trim();
                       	result = result.substring(result.indexOf("\"")+1, result.lastIndexOf("\"")) ;
@@ -375,7 +380,7 @@ public class UrbanDeployPublisher extends Notifier {
     	URI uri = UriBuilder.fromPath(site.getUrl()).path("cli").path("applicationProcessRequest")
                 .path("requestStatus").queryParam("request", proc).build();
         String result = site.executeJSONGet(uri);
-    	if(result != null && result.indexOf("SUCCEEDED") != -1){
+    	if(result != null && result.toLowerCase().indexOf("succeeded") != -1){
     		deploymentResult = result;
     		return true;
     	}
@@ -409,6 +414,15 @@ public class UrbanDeployPublisher extends Notifier {
         listener.getLogger().println("Application process deployment result: "+result);
         return result;
 
+    }
+    
+    private boolean addLinkToComp(UrbanDeploySite site, String compName, String versionName, String linkName, String linkUrl)
+    		throws Exception{  
+    	URI uri = UriBuilder.fromPath(site.getUrl()).path("cli").path("version")
+                .path("addLink").queryParam("component", compName).queryParam("version",versionName).
+                queryParam("linkName", linkName).queryParam("link", linkUrl).build();
+        String result = site.executeJSONPut(uri,"");
+    	return (result != null && result.toLowerCase().indexOf("succeeded") != -1);
     }
     
     /**
