@@ -144,6 +144,13 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
 
     private UUID createComponentVersion()
     throws Exception {
+        if (resolvedVersionName == null || resolvedVersionName.isEmpty() || resolvedVersionName.length() > 255) {
+            throw new Exception(String.format("Could not create version '%s' in UrbanCode Deploy. "
+                    + "UrbanCode Deploy version names' length must be between 1 and  255 characters "
+                    + "long. (Current length: %s)",
+                    resolvedVersionName,
+                    resolvedVersionName.length()));
+        }
         UriBuilder uriBuilder = UriBuilder.fromPath(udSite.getUrl()).path("cli").path("version")
                         .path("createVersion");
 
