@@ -36,8 +36,8 @@ public class UrbanDeployPublisher extends Notifier {
 
     private String siteName;
     private Boolean useAnotherUser = false;
-	private String anotherUser;
-	private String anotherPassword;
+    private String anotherUser;
+    private String anotherPassword;
     private String component;
     private String baseDir;
     private String directoryOffset;
@@ -50,10 +50,8 @@ public class UrbanDeployPublisher extends Notifier {
     private String deployEnv;
     private String deployProc;
     private Map<String, String> envMap = null;
-    
     private String properties;
     private String description;
-    
     private String deploymentResult;
 
     /**
@@ -66,7 +64,7 @@ public class UrbanDeployPublisher extends Notifier {
         this.useAnotherUser = useAnotherUser;
         this.anotherUser = anotherUser;
         this.anotherPassword = anotherPassword;
-    	this.component = component;
+        this.component = component;
         this.versionName = versionName;
         this.baseDir = baseDir;
         this.directoryOffset = directoryOffset;
@@ -102,9 +100,14 @@ public class UrbanDeployPublisher extends Notifier {
     }
 
     public boolean isUseAnotherUser() {
+        // For compatibility with old projects
+        if (useAnotherUser == null) {
+            useAnotherUser = false;
+        }
+
         return useAnotherUser;
     }
-    
+
     public String getAnotherUser() {
         return anotherUser;
     }
@@ -112,7 +115,7 @@ public class UrbanDeployPublisher extends Notifier {
     public void setAnotherUser(String anotherUser) {
         this.anotherUser = anotherUser;
     }
-    
+
     public String getAnotherPassword() {
         return anotherPassword;
     }
@@ -120,7 +123,7 @@ public class UrbanDeployPublisher extends Notifier {
     public void setAnotherPassword(String anotherPassword) {
         this.anotherPassword = anotherPassword;
     }
-    
+
     public String getComponent() {
         return component;
     }
@@ -171,19 +174,19 @@ public class UrbanDeployPublisher extends Notifier {
     public void setVersionName(String versionName) {
         this.versionName = versionName;
     }
-    
+
     public String getDescription() {
         return description;
     }
-    
+
     public void setDescription(String description) {
         this.description = description;
     }
-    
+
     public String getProperties() {
         return properties;
     }
-    
+
     public void setProperties(String properties) {
         this.properties = properties;
     }
@@ -264,20 +267,19 @@ public class UrbanDeployPublisher extends Notifier {
      * @throws java.io.IOException  {@inheritDoc}
      * @see hudson.tasks.BuildStep#perform(hudson.model.Build, hudson.Launcher, hudson.model.BuildListener)
      */
-    
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
             throws InterruptedException, IOException {
         if (build.getResult() == Result.FAILURE || build.getResult() == Result.ABORTED) {
             listener.getLogger().println("Skip artifacts upload and deployment to IBM UrbanCode Deploy - build failed or aborted.");
         }else{
-        	envMap = build.getEnvironment(listener);
+            envMap = build.getEnvironment(listener);
             UrbanDeploySite udSite = getSite();
-            
-        	String resolvedAnotherUser = null;
+
+            String resolvedAnotherUser = null;
             String resolvedAnotherPassword = null;
-            
-        	String resolvedComponent = null;
+
+            String resolvedComponent = null;
             String resolvedBaseDir = null;
             String resolvedVersionName = null;
             String resolvedFileIncludePatterns = null;
@@ -285,22 +287,22 @@ public class UrbanDeployPublisher extends Notifier {
             String resolvedDirectoryOffset = null;
             String resolvedProperties = null;
             String resolvedDescription = null;
-            
+
             String resolvedDeployApp = null;
             String resolvedDeployEnv = null;
             String resolvedDeployProc = null;
-            
+
             if(isUseAnotherUser()) {
                 resolvedAnotherUser = resolveVariables(getAnotherUser());
-                resolvedAnotherPassword = resolveVariables(getAnotherPassword());	
+                resolvedAnotherPassword = resolveVariables(getAnotherPassword());
                 udSite = new UrbanDeploySite(udSite.getProfileName(), udSite.getUrl(), resolvedAnotherUser, resolvedAnotherPassword);
-            	listener.getLogger().println("Use different user to access IBM UrbanCode Deploy server: " + udSite.getUser() );
+                listener.getLogger().println("Use different user to access IBM UrbanCode Deploy server: " + udSite.getUser() );
             }
-            
-        	if (isSkip()) {
+
+            if (isSkip()) {
                 listener.getLogger().println("Skip artifacts upload to IBM UrbanCode Deploy - step disabled.");
             }else{
-            	resolvedComponent = resolveVariables(getComponent());
+                resolvedComponent = resolveVariables(getComponent());
                 resolvedBaseDir = resolveVariables(getBaseDir());
                 resolvedVersionName = resolveVariables(getVersionName());
                 resolvedFileIncludePatterns = resolveVariables(fileIncludePatterns);
@@ -309,31 +311,32 @@ public class UrbanDeployPublisher extends Notifier {
                 resolvedProperties = resolveVariables(getProperties());
                 resolvedDescription = resolveVariables(getDescription());
                 try {
-                	PublishArtifactsCallable task = new PublishArtifactsCallable(resolvedBaseDir, resolvedDirectoryOffset,
+                    PublishArtifactsCallable task = new PublishArtifactsCallable(resolvedBaseDir, resolvedDirectoryOffset,
                             udSite, resolvedFileIncludePatterns, resolvedFileExcludePatterns, resolvedComponent,
                             resolvedVersionName, resolvedDescription, listener);
                     launcher.getChannel().call(task);
 
                     PropsHelper propsHelper = new PropsHelper();
-                    propsHelper.setComponentVersionProperties(udSite.getUrl(), resolvedComponent, resolvedVersionName, 
-                    							resolvedProperties, udSite.getUser(), udSite.getPassword(), listener); 
+                    propsHelper.setComponentVersionProperties(udSite.getUrl(), resolvedComponent, resolvedVersionName,
+                            resolvedProperties, udSite.getUser(), udSite.getPassword(), listener);
                     String linkName = "Jenkins Job " + build.getDisplayName();
-                    String linkUrl = Hudson.getInstance().getRootUrl() + build.getUrl() ;
-                	listener.getLogger().println("Add Jenkins job link " + linkUrl );
-                    this.addLinkToComp(udSite, resolvedComponent, resolvedVersionName, linkName, linkUrl);                  
-                }catch (Throwable th) {
+                    String linkUrl = Hudson.getInstance().getRootUrl() + build.getUrl();
+                    listener.getLogger().println("Add Jenkins job link " + linkUrl );
+                    this.addLinkToComp(udSite, resolvedComponent, resolvedVersionName, linkName, linkUrl);
+                }
+                catch (Throwable th) {
                     th.printStackTrace(listener.error("Failed to upload files" + th));
                     build.setResult(Result.UNSTABLE);
                     return true;
                 }
             }
-            
+
             if (isDeploy()){
                 resolvedDeployApp = resolveVariables(getDeployApp());
                 resolvedDeployEnv = resolveVariables(getDeployEnv());
                 resolvedDeployProc = resolveVariables(getDeployProc());
                 try {
-                	  if (resolvedDeployApp == null || resolvedDeployApp.trim().length() == 0) {
+                    if (resolvedDeployApp == null || resolvedDeployApp.trim().length() == 0) {
                           throw new Exception("Deploy Application is a required field if Deploy is selected!");
                       }
                       if (resolvedDeployEnv == null || resolvedDeployEnv.trim().length() == 0) {
@@ -343,50 +346,52 @@ public class UrbanDeployPublisher extends Notifier {
                           throw new Exception("Deploy Process is a required field if Deploy is selected!");
                       }
 
-                      listener.getLogger().println("Starting deployment process " + resolvedDeployProc + " of application " + 
-                    		  										resolvedDeployApp + " in environment " + resolvedDeployEnv);
+                      listener.getLogger().println("Starting deployment process " + resolvedDeployProc + " of application " +
+                              resolvedDeployApp + " in environment " + resolvedDeployEnv);
                       String result = null;
-                      
-                      result = createDefaultProcessRequest(udSite, resolvedDeployApp, resolvedDeployEnv, resolvedDeployProc, listener);                  	 
-                      
+
+                      result = createDefaultProcessRequest(udSite, resolvedDeployApp, resolvedDeployEnv, resolvedDeployProc, listener);
+
                       listener.getLogger().println("Deployment request id is: " + result);
                       if(result.contains("requestId")){
-                      	result = result.substring(result.indexOf("\"") + 12).trim();
-                      	result = result.substring(result.indexOf("\"")+1, result.lastIndexOf("\"")) ;
+                          result = result.substring(result.indexOf("\"") + 12).trim();
+                          result = result.substring(result.indexOf("\"")+1, result.lastIndexOf("\""));
                       }
-                      listener.getLogger().println("Deployment of application request " + result + " of application " + 
-                    		  													resolvedDeployApp + " is running...... ");
+                      listener.getLogger().println("Deployment of application request " + result + " of application " +
+                              resolvedDeployApp + " is running...... ");
                       long startTime = new Date().getTime();
                       while(!checkDeploymentProcessStatus(udSite, result)){
-                      	Thread.sleep(3000);
+                          Thread.sleep(3000);
                       }
                       if(deploymentResult != null){
-                      	long duration = (new Date().getTime()-startTime)/1000 ; 
-                      	listener.getLogger().println("Successfully finished deployment of application request " + result +
-                      			" of application " + resolvedDeployApp + " in " + resolvedDeployEnv + " with " + duration + " seconds");
+                          long duration = (new Date().getTime()-startTime)/1000 ; 
+                          listener.getLogger().println("Successfully finished deployment of application request " + result +
+                                  " of application " + resolvedDeployApp + " in " + resolvedDeployEnv + " with " + duration + " seconds");
                       }
-                }catch (Throwable th) {
+                }
+                catch (Throwable th) {
                     th.printStackTrace(listener.error("Failed to deploy application" + th));
                     build.setResult(Result.UNSTABLE);
                 }
-            }else {    
-            	listener.getLogger().println("Skip deploy application to IBM UrbanCode Deploy - step disabled.");
+            }
+            else {
+                listener.getLogger().println("Skip deploy application to IBM UrbanCode Deploy - step disabled.");
             }
         }
         return true;
     }
-    
+
     private boolean checkDeploymentProcessStatus(UrbanDeploySite site, String proc) throws Exception {
-    	URI uri = UriBuilder.fromPath(site.getUrl()).path("cli").path("applicationProcessRequest")
+        URI uri = UriBuilder.fromPath(site.getUrl()).path("cli").path("applicationProcessRequest")
                 .path("requestStatus").queryParam("request", proc).build();
         String result = site.executeJSONGet(uri);
-    	if(result != null && result.toLowerCase().indexOf("succeeded") != -1){
-    		deploymentResult = result;
-    		return true;
-    	}
-    	return false;
+        if(result != null && result.toLowerCase().indexOf("succeeded") != -1){
+            deploymentResult = result;
+            return true;
+        }
+        return false;
     }
-    
+
     /**
      * This method will trigger application deployment process with latest versions of each component.
      */
@@ -402,10 +407,10 @@ public class UrbanDeployPublisher extends Notifier {
 
         JSONArray compsArray = new JSONArray();
         for(int i=0; i < components.length; i ++){
-        	JSONObject compObj = new JSONObject();
-        	compObj.put("version", "latest");
-        	compObj.put("component", components[i]);
-        	compsArray.put(i, compObj);
+            JSONObject compObj = new JSONObject();
+            compObj.put("version", "latest");
+            compObj.put("component", components[i]);
+            compsArray.put(i, compObj);
         }
         appProcess.put("versions", compsArray);
         String appProcessStr = appProcess.toString();
@@ -415,16 +420,16 @@ public class UrbanDeployPublisher extends Notifier {
         return result;
 
     }
-    
+
     private boolean addLinkToComp(UrbanDeploySite site, String compName, String versionName, String linkName, String linkUrl)
-    		throws Exception{  
-    	URI uri = UriBuilder.fromPath(site.getUrl()).path("cli").path("version")
+            throws Exception{
+        URI uri = UriBuilder.fromPath(site.getUrl()).path("cli").path("version")
                 .path("addLink").queryParam("component", compName).queryParam("version",versionName).
                 queryParam("linkName", linkName).queryParam("link", linkUrl).build();
         String result = site.executeJSONPut(uri,"");
-    	return (result != null && result.toLowerCase().indexOf("succeeded") != -1);
+        return (result != null && result.toLowerCase().indexOf("succeeded") != -1);
     }
-    
+
     /**
      * This method will get all components of application.
      */
@@ -435,15 +440,14 @@ public class UrbanDeployPublisher extends Notifier {
                 .path("componentsInApplication").queryParam("application", app).build();
         String result = site.executeJSONGet(uri);
         JSONArray compArray = new JSONArray(result); 
-    	String[] components = new String[compArray.length()];
+        String[] components = new String[compArray.length()];
         for(int i=0; i < compArray.length(); i++){
-        	components[i] = compArray.getJSONObject(i).getString("name");
+            components[i] = compArray.getJSONObject(i).getString("name");
         }
-        
         return components;
 
     }
-    
+
     private String resolveVariables(String input) {
         String result = input;
         if (input != null && input.trim().length() > 0) {
@@ -460,5 +464,3 @@ public class UrbanDeployPublisher extends Notifier {
         return result;
     }
 }
-
-
