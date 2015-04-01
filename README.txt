@@ -6,3 +6,5 @@ newer version of log4j jar exists but I have been unable to make it work.
 Fixed PI32899 - Jenkins plugin fails on slave nodes with an UnserializbleException
 
 Fixed PI36005 - Jenkins plugin 1.2.1 not compatible with builds created with earlier versions of the plugin
+
+Fixed PI37957 - Pulled in a fix for excludes options not being handled by a common library.
