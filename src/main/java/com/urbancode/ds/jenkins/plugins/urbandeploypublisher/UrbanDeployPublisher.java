@@ -348,25 +348,32 @@ public class UrbanDeployPublisher extends Notifier {
 
                       listener.getLogger().println("Starting deployment process " + resolvedDeployProc + " of application " +
                               resolvedDeployApp + " in environment " + resolvedDeployEnv);
-                      String result = null;
+                      String requestId = null;
 
-                      result = createDefaultProcessRequest(udSite, resolvedDeployApp, resolvedDeployEnv, resolvedDeployProc, listener);
+                      requestId = createDefaultProcessRequest(udSite, resolvedDeployApp, resolvedDeployEnv, resolvedDeployProc, listener);
 
-                      listener.getLogger().println("Deployment request id is: " + result);
-                      if(result.contains("requestId")){
-                          result = result.substring(result.indexOf("\"") + 12).trim();
-                          result = result.substring(result.indexOf("\"")+1, result.lastIndexOf("\""));
+                      listener.getLogger().println("Deployment request id is: " + requestId);
+                      if(requestId.contains("requestId")){
+                          requestId = requestId.substring(requestId.indexOf("\"") + 12).trim();
+                          requestId = requestId.substring(requestId.indexOf("\"")+1, requestId.lastIndexOf("\""));
                       }
-                      listener.getLogger().println("Deployment of application request " + result + " of application " +
+                      listener.getLogger().println("Deployment of application request " + requestId + " of application " +
                               resolvedDeployApp + " is running...... ");
                       long startTime = new Date().getTime();
-                      while(!checkDeploymentProcessStatus(udSite, result)){
+                      while(!checkDeploymentProcessStatus(udSite, requestId)){
                           Thread.sleep(3000);
                       }
                       if(deploymentResult != null){
                           long duration = (new Date().getTime()-startTime)/1000 ; 
-                          listener.getLogger().println("Successfully finished deployment of application request " + result +
-                                  " of application " + resolvedDeployApp + " in " + resolvedDeployEnv + " with " + duration + " seconds");
+                          listener.getLogger().println("Finished deployment of application request " + requestId +
+                                  " for application " + resolvedDeployApp + " in environment " +
+                                  resolvedDeployEnv + " in " + duration + " seconds");
+                          listener.getLogger().println("The deployment " + deploymentResult + 
+                                  ". See the UrbanCode Deploy deployment logs for details.");
+                          if ("faulted".equalsIgnoreCase(deploymentResult) || 
+                                  "failed to start".equalsIgnoreCase(deploymentResult)) {
+                              build.setResult(Result.UNSTABLE);
+                          }
                       }
                 }
                 catch (Throwable th) {
@@ -382,14 +389,26 @@ public class UrbanDeployPublisher extends Notifier {
     }
 
     private boolean checkDeploymentProcessStatus(UrbanDeploySite site, String proc) throws Exception {
+        boolean processFinished = false;
         URI uri = UriBuilder.fromPath(site.getUrl()).path("cli").path("applicationProcessRequest")
                 .path("requestStatus").queryParam("request", proc).build();
-        String result = site.executeJSONGet(uri);
-        if(result != null && result.toLowerCase().indexOf("succeeded") != -1){
-            deploymentResult = result;
-            return true;
+        String requestStatusResult = site.executeJSONGet(uri);
+        if (requestStatusResult != null) {
+            JSONObject resultJSON = new JSONObject(requestStatusResult);
+            String executionStatus = resultJSON.optString("status");
+            String executionResult = resultJSON.optString("result");
+            if (executionStatus == null || "".equals(executionStatus)) {
+                deploymentResult = "FAULTED";
+                processFinished = true;
+            }
+            else if ("closed".equalsIgnoreCase(executionStatus) ||
+                "faulted".equalsIgnoreCase(executionStatus) ||
+                "faulted".equalsIgnoreCase(executionResult)) {
+                deploymentResult = executionResult;
+                processFinished = true;
+            }
         }
-        return false;
+        return processFinished;
     }
 
     /**
