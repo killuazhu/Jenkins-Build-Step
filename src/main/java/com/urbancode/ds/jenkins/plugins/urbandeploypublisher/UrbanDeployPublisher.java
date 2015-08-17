@@ -350,7 +350,8 @@ public class UrbanDeployPublisher extends Notifier {
                               resolvedDeployApp + " in environment " + resolvedDeployEnv);
                       String requestId = null;
 
-                      requestId = createDefaultProcessRequest(udSite, resolvedDeployApp, resolvedDeployEnv, resolvedDeployProc, listener);
+                      requestId = createDefaultProcessRequest(udSite, resolvedDeployApp, resolvedDeployEnv,
+                                      resolvedDeployProc, resolvedComponent, resolvedVersionName, listener);
 
                       listener.getLogger().println("Deployment request id is: " + requestId);
                       if(requestId.contains("requestId")){
@@ -414,23 +415,21 @@ public class UrbanDeployPublisher extends Notifier {
     /**
      * This method will trigger application deployment process with latest versions of each component.
      */
-    private String createDefaultProcessRequest(UrbanDeploySite site, String app, String env, String proc, BuildListener listener)
+    private String createDefaultProcessRequest(UrbanDeploySite site, String app, String env, String proc,
+                    String componentName, String versionName, BuildListener listener)
             throws Exception {
         URI uri = UriBuilder.fromPath(site.getUrl()).path("cli").path("applicationProcessRequest")
                 .path("request").build();
-        String[] components = this.getApplicationComponents(site, app);
         JSONObject appProcess = new JSONObject();
         appProcess.put("application", app);
         appProcess.put("applicationProcess", proc);
         appProcess.put("environment", env);
 
         JSONArray compsArray = new JSONArray();
-        for(int i=0; i < components.length; i ++){
-            JSONObject compObj = new JSONObject();
-            compObj.put("version", "latest");
-            compObj.put("component", components[i]);
-            compsArray.put(i, compObj);
-        }
+        JSONObject compObj = new JSONObject();
+        compObj.put("version", versionName);
+        compObj.put("component", componentName);
+        compsArray.put(compObj);
         appProcess.put("versions", compsArray);
         String appProcessStr = appProcess.toString();
         listener.getLogger().println("Application process deployment request: "+appProcessStr);
@@ -447,24 +446,6 @@ public class UrbanDeployPublisher extends Notifier {
                 queryParam("linkName", linkName).queryParam("link", linkUrl).build();
         String result = site.executeJSONPut(uri,"");
         return (result != null && result.toLowerCase().indexOf("succeeded") != -1);
-    }
-
-    /**
-     * This method will get all components of application.
-     */
-    private String[] getApplicationComponents(UrbanDeploySite site, String app)
-            throws Exception {
-
-        URI uri = UriBuilder.fromPath(site.getUrl()).path("cli").path("application")
-                .path("componentsInApplication").queryParam("application", app).build();
-        String result = site.executeJSONGet(uri);
-        JSONArray compArray = new JSONArray(result); 
-        String[] components = new String[compArray.length()];
-        for(int i=0; i < compArray.length(); i++){
-            components[i] = compArray.getJSONObject(i).getString("name");
-        }
-        return components;
-
     }
 
     private String resolveVariables(String input) {
