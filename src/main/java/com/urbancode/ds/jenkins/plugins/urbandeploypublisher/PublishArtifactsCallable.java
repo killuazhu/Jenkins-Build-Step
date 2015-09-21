@@ -6,7 +6,10 @@ import hudson.remoting.Callable;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -34,7 +37,7 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
     final private UrbanDeploySite udSite;
     final private String resolvedFileIncludePatterns;
     final private String resolvedFileExcludePatterns;
-    final private String resolvedComponent;
+    final private List<String> resolvedComponents;
     final private String resolvedVersionName;
     final private String resolvedDescription;
     final private BuildListener listener;
@@ -45,7 +48,7 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
         UrbanDeploySite udSite,
         String resolvedFileIncludePatterns,
         String resolvedFileExcludePatterns,
-        String resolvedComponent,
+        List<String> resolvedComponents,
         String resolvedVersionName,
         String resolvedDescription,
         BuildListener listener)
@@ -62,7 +65,7 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
         this.udSite = udSite;
         this.resolvedFileIncludePatterns = resolvedFileIncludePatterns;
         this.resolvedFileExcludePatterns = resolvedFileExcludePatterns;
-        this.resolvedComponent = resolvedComponent;
+        this.resolvedComponents = resolvedComponents;
         this.resolvedVersionName = resolvedVersionName;
         this.resolvedDescription = resolvedDescription;
         this.listener = listener;
@@ -80,61 +83,150 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
 
         Set<String> includes = new HashSet<String>();
         Set<String> excludes = new HashSet<String>();
+        Map<String, String> includeMappings = new HashMap<String, String>();
+        Map<String, String> excludeMappings = new HashMap<String, String>();
+
         for (String pattern : resolvedFileIncludePatterns.split("\n")) {
+            boolean mapping = false;
+            String component = null;
+
+            if (pattern.contains("=")) {
+                mapping = true;
+                String[] componentPattern = pattern.split("=");
+
+                if (componentPattern.length == 2) {
+                    pattern = componentPattern[0];
+                    component = componentPattern[1];
+                }
+                else {
+                    throw new Exception("Invalid component mapping: " + componentPattern);
+                }
+            }
+            else {
+                mapping = false;
+            }
+
             if (pattern != null && pattern.trim().length() > 0) {
-                includes.add(pattern.trim());
+                //configure component mappings
+                if (mapping) {
+                     if (component != null && component.trim().length() > 0) {
+                         includeMappings.put(pattern.trim(), component.trim());
+                     }
+                }
+                //no mapping specified on this line
+                else {
+                    includes.add(pattern.trim());
+                }
             }
         }
+
         for (String pattern : resolvedFileExcludePatterns.split("\n")) {
+            boolean mapping = false;
+            String component = null;
+
+            if (pattern.contains("=")) {
+                mapping = true;
+                String[] componentPattern = pattern.split("=");
+
+                if (componentPattern.length == 2) {
+                    pattern = componentPattern[0];
+                    component = componentPattern[1];
+                }
+                else {
+                    throw new Exception("Invalid component mapping: " + componentPattern);
+                }
+            }
+            else {
+                mapping = false;
+            }
+
             if (pattern != null && pattern.trim().length() > 0) {
-                excludes.add(pattern.trim());
+                //configure component mappings
+                if (mapping) {
+                     if (component != null && component.trim().length() > 0) {
+                         excludeMappings.put(pattern.trim(), component.trim());
+                     }
+                }
+                //no mapping specified on this line
+                else {
+                    excludes.add(pattern.trim());
+                }
             }
         }
 
         listener.getLogger().println("Connecting to " + udSite.getUrl());
         boolean ok = false;
-        UUID artifactSetId = createComponentVersion();
-        try {
-            listener.getLogger().println("Working Directory: " + workDir.getPath());
-            listener.getLogger().println("Includes: " + resolvedFileIncludePatterns);
-            listener.getLogger().println("Excludes: " + resolvedFileExcludePatterns);
 
-            HttpClientBuilder builder = new HttpClientBuilder();
-            builder.setUsername(udSite.getUser());
-            builder.setPassword(udSite.getPassword());
-            builder.setTrustAllCerts(true);
-            builder.setPreemptiveAuthentication(true);
-            HttpClientWrapper wrapper = new HttpClientWrapper(builder.buildClient());
-            wrapper.setTimeout(60 * 1000, 5 * 60 * 1000);
-            CodestationClient client = new CodestationClient(udSite.getUrl(), wrapper);
-
-            client.start();
+        for (String resolvedComponent : resolvedComponents) {
+            UUID artifactSetId = createComponentVersion(resolvedComponent);
             try {
-                Upload up = new Upload(client, workDir, artifactSetId);
-                up.setMessageStream(listener.getLogger());
-                up.setIncludes(new ArrayList<String>(includes));
-                up.setExcludes(new ArrayList<String>(excludes));
-                up.setSaveExecuteBits(true);
+                listener.getLogger().println("Working Directory: " + workDir.getPath());
+
+                HttpClientBuilder builder = new HttpClientBuilder();
+                builder.setUsername(udSite.getUser());
+                builder.setPassword(udSite.getPassword());
+                builder.setTrustAllCerts(true);
+                builder.setPreemptiveAuthentication(true);
+                HttpClientWrapper wrapper = new HttpClientWrapper(builder.buildClient());
+                wrapper.setTimeout(60 * 1000, 5 * 60 * 1000);
+                CodestationClient client = new CodestationClient(udSite.getUrl(), wrapper);
+                List<String> includeList = new ArrayList<String>(includes);
+                List<String> excludeList = new ArrayList<String>(excludes);
+
+                //include mapped patterns
+                for (Map.Entry<String, String> includeEntry : includeMappings.entrySet()) {
+                    if (includeEntry.getValue().equals(resolvedComponent)) {
+                        includeList.add(includeEntry.getKey());
+                    }
+                }
+
+                //exclude mapped patterns
+                for (Map.Entry<String, String> excludeEntry : excludeMappings.entrySet()) {
+                    if (excludeEntry.getValue().equals(resolvedComponent)) {
+                        excludeList.add(excludeEntry.getKey());
+                    }
+                }
+
+                listener.getLogger().println("Includes: ");
+
+                for (String include : includeList) {
+                    listener.getLogger().println(include);
+                }
+
+                listener.getLogger().println("Excludes: ");
+
+                for (String exclude : excludeList) {
+                    listener.getLogger().println(excludes);
+                }
+
+                client.start();
                 try {
-                    up.run();
+                    Upload up = new Upload(client, workDir, artifactSetId);
+                    up.setMessageStream(listener.getLogger());
+                    up.setIncludes(includeList);
+                    up.setExcludes(excludeList);
+                    up.setSaveExecuteBits(true);
+                    try {
+                        up.run();
+                    }
+                    catch (Throwable e) {
+                        throw new Exception("Failed to upload files", e);
+                    }
                 }
-                catch (Throwable e) {
-                    throw new Exception("Failed to upload files", e);
+                finally {
+                    client.stop();
                 }
+                ok = true;
             }
             finally {
-                client.stop();
-            }
-            ok = true;
-        }
-        finally {
-            if (!ok) {
-                try {
-                    deleteComponentVersion(artifactSetId);
-                }
-                catch (Throwable t) {
-                    listener.getLogger().println("Deletion failed");
-                    t.printStackTrace(listener.getLogger());
+                if (!ok) {
+                    try {
+                        deleteComponentVersion(artifactSetId);
+                    }
+                    catch (Throwable t) {
+                        listener.getLogger().println("Deletion failed");
+                        t.printStackTrace(listener.getLogger());
+                    }
                 }
             }
         }
@@ -142,7 +234,7 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
         return true;
     }
 
-    private UUID createComponentVersion()
+    private UUID createComponentVersion(String resolvedComponent)
     throws Exception {
         if (resolvedVersionName == null || resolvedVersionName.isEmpty() || resolvedVersionName.length() > 255) {
             throw new Exception(String.format("Could not create version '%s' in UrbanCode Deploy. "

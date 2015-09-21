@@ -20,8 +20,8 @@
       <f:entry title="User Password" field="anotherPassword" help="${helpURL}/help-password.html">
         <f:password/>
       </f:entry>
-      <f:entry title="Component" field="component" help="${helpURL}/help-component.html">
-        <f:textbox/>
+      <f:entry title="Components" field="components" help="${helpURL}/help-component.html">
+        <f:expandableTextbox/>
       </f:entry>
       <f:entry title="Base Artifact Directory" field="baseDir" help="${helpURL}/help-basedir.html">
         <f:textbox default="${WORKSPACE}"/>
