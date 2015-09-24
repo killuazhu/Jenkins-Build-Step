@@ -40,6 +40,7 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
     final private List<String> resolvedComponents;
     final private String resolvedVersionName;
     final private String resolvedDescription;
+    final private String versionType;
     final private BuildListener listener;
 
     public PublishArtifactsCallable(
@@ -51,6 +52,7 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
         List<String> resolvedComponents,
         String resolvedVersionName,
         String resolvedDescription,
+        String versionType,
         BuildListener listener)
     {
         if (resolvedFileIncludePatterns == null) {
@@ -68,6 +70,7 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
         this.resolvedComponents = resolvedComponents;
         this.resolvedVersionName = resolvedVersionName;
         this.resolvedDescription = resolvedDescription;
+        this.versionType = versionType;
         this.listener = listener;
     }
 
@@ -249,6 +252,7 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
         uriBuilder.queryParam("component", resolvedComponent);
         uriBuilder.queryParam("name", resolvedVersionName);
         uriBuilder.queryParam("description", resolvedDescription);
+        uriBuilder.queryParam("type", versionType);
         URI uri = uriBuilder.build();
 
         listener.getLogger().println("Creating new version \""+resolvedVersionName+

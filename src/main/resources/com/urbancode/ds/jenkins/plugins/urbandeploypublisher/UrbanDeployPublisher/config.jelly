@@ -47,6 +47,9 @@
       <f:entry title="Skip publishing (e.g. temporarily)" field="skip">
         <f:checkbox/>
       </f:entry>
+      <f:entry title="Incremental Version" field="incremental" help="${helpURL}/help-incremental.html">
+        <f:checkbox/>
+      </f:entry>
       <f:entry title="Deploy" field="deploy" help="${helpURL}/help-deploy.html">
         <f:checkbox/>
       </f:entry>
@@ -61,6 +64,4 @@
       </f:entry>
     </table>
   </f:entry>
-
-
 </j:jelly>

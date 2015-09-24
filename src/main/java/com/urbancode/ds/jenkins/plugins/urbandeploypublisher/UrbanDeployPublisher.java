@@ -48,6 +48,7 @@ public class UrbanDeployPublisher extends Notifier {
     private String versionName;
     private Boolean skip = false;
     private Boolean deploy = false;
+    private Boolean incremental = false;
     private String deployApp;
     private String deployEnv;
     private String deployProc;
@@ -61,7 +62,7 @@ public class UrbanDeployPublisher extends Notifier {
      */
     @DataBoundConstructor
     public UrbanDeployPublisher(String siteName, Boolean useAnotherUser, String anotherUser, String anotherPassword, String components, String versionName, String directoryOffset, String baseDir,
-                                String fileIncludePatterns, String fileExcludePatterns, Boolean skip, Boolean deploy,
+                                String fileIncludePatterns, String fileExcludePatterns, Boolean skip, Boolean deploy, Boolean incremental,
                                 String deployApp, String deployEnv, String deployProc, String properties, String description) {
         this.useAnotherUser = useAnotherUser;
         this.anotherUser = anotherUser;
@@ -75,6 +76,7 @@ public class UrbanDeployPublisher extends Notifier {
         this.siteName = siteName;
         this.skip = skip;
         this.deploy = deploy;
+        this.incremental = incremental;
         this.deployApp = deployApp;
         this.deployEnv = deployEnv;
         this.deployProc = deployProc;
@@ -209,6 +211,14 @@ public class UrbanDeployPublisher extends Notifier {
         return deploy;
     }
 
+    public void setIncremental(boolean incremental) {
+        this.incremental = incremental;
+    }
+
+    public boolean isIncremental() {
+        return incremental;
+    }
+
     public void setDeployApp(String deployApp) {
         this.deployApp = deployApp;
     }
@@ -277,6 +287,7 @@ public class UrbanDeployPublisher extends Notifier {
         }else{
             envMap = build.getEnvironment(listener);
             UrbanDeploySite udSite = getSite();
+            String versionType = "FULL";
 
             String resolvedAnotherUser = null;
             String resolvedAnotherPassword = null;
@@ -302,6 +313,10 @@ public class UrbanDeployPublisher extends Notifier {
                 listener.getLogger().println("Use different user to access IBM UrbanCode Deploy server: " + udSite.getUser() );
             }
 
+            if (isIncremental()) {
+                versionType = "INCREMENTAL";
+            }
+
             if (isSkip()) {
                 listener.getLogger().println("Skip artifacts upload to IBM UrbanCode Deploy - step disabled.");
             }else{
@@ -324,7 +339,7 @@ public class UrbanDeployPublisher extends Notifier {
 
                     PublishArtifactsCallable task = new PublishArtifactsCallable(resolvedBaseDir, resolvedDirectoryOffset,
                             udSite, resolvedFileIncludePatterns, resolvedFileExcludePatterns, parsedComponents,
-                            resolvedVersionName, resolvedDescription, listener);
+                            resolvedVersionName, resolvedDescription, versionType, listener);
                     launcher.getChannel().call(task);
                     PropsHelper propsHelper = new PropsHelper();
                     propsHelper.setComponentVersionProperties(udSite.getUrl(), parsedComponents, resolvedVersionName,
@@ -459,7 +474,7 @@ public class UrbanDeployPublisher extends Notifier {
                     queryParam("linkName", linkName).queryParam("link", linkUrl).build();
             result = site.executeJSONPut(uri,"");
 
-            if (result == null || result.toLowerCase().indexOf("scucceeded") == -1) {
+            if (result == null || result.toLowerCase().indexOf("succeeded") == -1) {
                 return false;
             }
         }
