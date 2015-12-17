@@ -8,6 +8,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.Hudson;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
+import hudson.util.Secret;
 
 import java.io.IOException;
 import java.net.URI;
@@ -39,8 +40,8 @@ public class UrbanDeployPublisher extends Notifier {
     private String siteName;
     private Boolean useAnotherUser = false;
     private String anotherUser;
-    private String anotherPassword;
     private String components;
+    private Secret anotherPassword;
     private String baseDir;
     private String directoryOffset;
     private String fileIncludePatterns;
@@ -61,7 +62,7 @@ public class UrbanDeployPublisher extends Notifier {
      * Default constructor
      */
     @DataBoundConstructor
-    public UrbanDeployPublisher(String siteName, Boolean useAnotherUser, String anotherUser, String anotherPassword, String components, String versionName, String directoryOffset, String baseDir,
+    public UrbanDeployPublisher(String siteName, Boolean useAnotherUser, String anotherUser, Secret anotherPassword, String components, String versionName, String directoryOffset, String baseDir,
                                 String fileIncludePatterns, String fileExcludePatterns, Boolean skip, Boolean deploy, Boolean incremental,
                                 String deployApp, String deployEnv, String deployProc, String properties, String description) {
         this.useAnotherUser = useAnotherUser;
@@ -120,11 +121,11 @@ public class UrbanDeployPublisher extends Notifier {
         this.anotherUser = anotherUser;
     }
 
-    public String getAnotherPassword() {
+    public Secret getAnotherPassword() {
         return anotherPassword;
     }
 
-    public void setAnotherPassword(String anotherPassword) {
+    public void setAnotherPassword(Secret anotherPassword) {
         this.anotherPassword = anotherPassword;
     }
 
@@ -290,7 +291,7 @@ public class UrbanDeployPublisher extends Notifier {
             String versionType = "FULL";
 
             String resolvedAnotherUser = null;
-            String resolvedAnotherPassword = null;
+            Secret resolvedAnotherPassword = null;
 
             String resolvedComponents = null;
             List<String> parsedComponents = null;
@@ -308,7 +309,7 @@ public class UrbanDeployPublisher extends Notifier {
 
             if(isUseAnotherUser()) {
                 resolvedAnotherUser = resolveVariables(getAnotherUser());
-                resolvedAnotherPassword = resolveVariables(getAnotherPassword());
+                resolvedAnotherPassword = resolvePassword(getAnotherPassword());
                 udSite = new UrbanDeploySite(udSite.getProfileName(), udSite.getUrl(), resolvedAnotherUser, resolvedAnotherPassword);
                 listener.getLogger().println("Use different user to access IBM UrbanCode Deploy server: " + udSite.getUser() );
             }
@@ -321,8 +322,8 @@ public class UrbanDeployPublisher extends Notifier {
                 listener.getLogger().println("Skip artifacts upload to IBM UrbanCode Deploy - step disabled.");
             }else{
                 resolvedComponents = resolveVariables(getComponents());
-                resolvedBaseDir = resolveVariables(getBaseDir());
                 resolvedVersionName = resolveVariables(getVersionName());
+                resolvedBaseDir = resolveVariables(getBaseDir());
                 resolvedFileIncludePatterns = resolveVariables(fileIncludePatterns);
                 resolvedFileExcludePatterns = resolveVariables(fileExcludePatterns);
                 resolvedDirectoryOffset = resolveVariables(directoryOffset);
@@ -343,7 +344,7 @@ public class UrbanDeployPublisher extends Notifier {
                     launcher.getChannel().call(task);
                     PropsHelper propsHelper = new PropsHelper();
                     propsHelper.setComponentVersionProperties(udSite.getUrl(), parsedComponents, resolvedVersionName,
-                            resolvedProperties, udSite.getUser(), udSite.getPassword(), listener);
+                            resolvedProperties, udSite.getUser(), udSite.getPassword().toString(), listener);
                    String linkName = "Jenkins Job " + build.getDisplayName();
                    String linkUrl = Hudson.getInstance().getRootUrl() + build.getUrl();
                    listener.getLogger().println("Add Jenkins job link " + linkUrl );
@@ -452,12 +453,22 @@ public class UrbanDeployPublisher extends Notifier {
         appProcess.put("applicationProcess", proc);
         appProcess.put("environment", env);
 
-        JSONArray compsArray = new JSONArray();
-        JSONObject compObj = new JSONObject();
-        compObj.put("version", versionName);
-        compObj.put("component", componentName);
-        compsArray.put(compObj);
-        appProcess.put("versions", compsArray);
+        if (componentName.trim().length() > 0) {
+            JSONArray compsArray = new JSONArray();
+            JSONObject compObj = new JSONObject();
+
+            if (versionName.trim().length() > 0) {
+                compObj.put("version", versionName);
+            }
+            else {
+                compObj.put("version", "latest");
+            }
+
+            compObj.put("component", componentName);
+            compsArray.put(compObj);
+            appProcess.put("versions", compsArray);
+        }
+
         String appProcessStr = appProcess.toString();
         listener.getLogger().println("Application process deployment request: "+appProcessStr);
         String result = site.executeJSONPut(uri,appProcessStr);
@@ -480,6 +491,11 @@ public class UrbanDeployPublisher extends Notifier {
         }
 
         return true;
+    }
+
+    private Secret resolvePassword(Secret password) {
+        String resolvedText = resolveVariables(password.toString());
+        return Secret.fromString(resolvedText);
     }
 
     private String resolveVariables(String input) {

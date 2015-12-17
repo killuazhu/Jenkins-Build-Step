@@ -167,7 +167,7 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
 
                 HttpClientBuilder builder = new HttpClientBuilder();
                 builder.setUsername(udSite.getUser());
-                builder.setPassword(udSite.getPassword());
+                builder.setPassword(udSite.getPassword().toString());
                 builder.setTrustAllCerts(true);
                 builder.setPreemptiveAuthentication(true);
                 HttpClientWrapper wrapper = new HttpClientWrapper(builder.buildClient());
