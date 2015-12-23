@@ -1,0 +1,34 @@
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+
+  <j:set var="helpURL" value="/plugin/ibm-ucdeploy-publisher"/>
+
+  <f:entry>
+    <table width="100%">
+      <f:entry title="IBM UrbanCode Deploy Server" help="${helpURL}/help-site.html">
+        <select class="setting-input" name="siteName">
+          <j:forEach var="s" items="${descriptor.getSites()}">
+            <f:option selected="${s.displayName==instance.siteName}">${s.displayName}</f:option>
+          </j:forEach>
+        </select>
+      </f:entry>
+      <f:entry title="Application Name" field="deployApp" help="${helpURL}/help-deployapp.html">
+        <f:textbox/>
+      </f:entry>
+      <f:entry title="Application Process Name" field="deployProc" help="${helpURL}/help-deployproc.html">
+        <f:textbox/>
+      </f:entry>
+      <f:entry title="Component Versions" field="componentVersions" help="${helpURL}/help-componentversions.html">
+        <f:textarea/>
+      </f:entry>
+      <f:entry title="Environment Name" field="deployEnv" help="${helpURL}/help-deployenv.html">
+        <f:textbox/>
+      </f:entry>
+      <f:entry title="Only Changed Versions" field="onlyChanged" help="${helpURL}/help-onlychanged.html">
+        <f:checkbox/>
+      </f:entry>
+      <f:entry title="Snapshot" field="snapshot" help="${helpURL}/help-snapshot.html">
+        <f:textbox/>
+      </f:entry>
+    </table>
+  </f:entry>
+</j:jelly>

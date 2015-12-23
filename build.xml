@@ -105,6 +105,15 @@
     <target name="prepare" depends="resolve">
         <exec executable="${mvn}">
           <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/uDeployRestClient.jar"/>
+          <arg value="-DgroupId=uc-uDeployRestClient"/>
+          <arg value="-DartifactId=uc-uDeployRestClient"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}">
+          <arg value="install:install-file"/>
           <arg value="-Dfile=lib/codestation-aggregate.jar"/>
           <arg value="-DgroupId=uc-codestation-aggregate"/>
           <arg value="-DartifactId=uc-codestation-aggregate"/>

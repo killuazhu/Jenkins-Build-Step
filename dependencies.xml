@@ -10,7 +10,7 @@
         <directory>lib</directory>
       </delivery>
     </dependency>
-    
+
     <dependency>
       <cs-project name="Jakarta Commons Codec"/>
       <criteria status="success"/>
@@ -26,7 +26,7 @@
         <directory>lib</directory>
       </delivery>
     </dependency>
-    
+
     <dependency>
       <cs-project name='Apache HttpComponents' />
       <criteria stamp='4.3.4' status='success' />
@@ -34,7 +34,7 @@
         <directory>lib</directory>
       </delivery>
     </dependency>
-    
+
     <dependency>
       <cs-project name="Apache-log4j"/>
       <criteria stamp="1.2.16" />
@@ -82,7 +82,7 @@
         <directory>lib</directory>
       </delivery>
     </dependency>
-    
+
     <dependency>
       <ah-project name='replicated-codestation' workflow='build workflow [master]' />
       <criteria status='success' />
@@ -90,7 +90,7 @@
         <directory>lib</directory>
       </delivery>
     </dependency>
-    
+
     <dependency>
       <cs-project name="Apache-Commons-Lang3" />
       <criteria stamp="3.*" status="success" />
@@ -98,7 +98,14 @@
         <directory>lib</directory>
       </delivery>
     </dependency>
-    
-    <!-- TEST -->
+
+    <dependency>
+      <ah-project name='uDeployRestClient' workflow='build workflow [master]' />
+      <criteria status='success' />
+      <delivery artifact-set='Dist'>
+        <directory>lib</directory>
+      </delivery>
+    </dependency>
+
   </dependencies>
 </project>

@@ -1,4 +1,4 @@
-# ignore all dotfiles by except git specific ones
+# ignore all dotfiles except git specific ones
 .*
 !.gitignore
 !.git*

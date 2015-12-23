@@ -3,27 +3,29 @@
 
   <f:section title="IBM UrbanCode Deploy Server">
     <f:entry title="">
-      <f:repeatable var="site" items="${descriptor.sites}">
+      <f:repeatable name="sites" var="site" items="${descriptor.sites}">
         <table width="100%">
           <f:entry title="Profile Name" help="${helpURL}/help-profile.html">
-            <f:textbox name="ud.profileName" value="${site.profileName}"/>
+            <f:textbox name="profileName" value="${site.profileName}"/>
           </f:entry>
           <f:entry title="IBM UrbanCode Deploy URL" help="${helpURL}/help-url.html">
-            <f:textbox name="ud.url" value="${site.url}"/>
+            <f:textbox name="url" value="${site.url}"/>
           </f:entry>
-
           <f:entry title="User Name" help="${helpURL}/help-user.html">
-            <f:textbox name="ud.user" value="${site.user}"/>
+            <f:textbox name="user" value="${site.user}"/>
           </f:entry>
           <f:entry title="Password" help="${helpURL}/help-password.html">
-            <f:password name="ud.password" value="${site.password}"/>
+            <f:password name="password" value="${site.password}"/>
+          </f:entry>
+          <f:entry title="Trust All Certificates" help="${helpURL}/help-trust.html">
+            <f:checkbox name="trustAllCerts" checked="${site.trustAllCerts}" value="${site.trustAllCerts}"/>
           </f:entry>
           <f:entry title="">
             <div style="text-align: right">
               <f:repeatableDeleteButton/>
               <f:validateButton
                   title="${%Test Connection}" progress="${%Testing...}"
-                  method="testConnection" with="ud.url,ud.user,ud.password"/>
+                  method="testConnection" with="url,user,password,trustAllCerts"/>
             </div>
           </f:entry>
         </table>
