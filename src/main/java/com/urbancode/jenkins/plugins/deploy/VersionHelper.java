@@ -291,16 +291,18 @@ public class VersionHelper {
     private Map<String, String> readProperties(String properties) throws AbortException {
         Map<String, String> propertiesToSet = new HashMap<String, String>();
 
-        for (String line : properties.split("\n")) {
-            String[] propDef = line.split("=");
+        if (properties != null && !properties.isEmpty()) {
+            for (String line : properties.split("\n")) {
+                String[] propDef = line.split("=");
 
-            if (propDef.length >= 2) {
-                String propName = propDef[0].trim();
-                String propVal = propDef[1].trim();
-                propertiesToSet.put(propName, propVal);
-            }
-            else {
-                throw new AbortException("Missing property delimiter '=' in property definition '" + line + "'");
+                if (propDef.length >= 2) {
+                    String propName = propDef[0].trim();
+                    String propVal = propDef[1].trim();
+                    propertiesToSet.put(propName, propVal);
+                }
+                else {
+                    throw new AbortException("Missing property delimiter '=' in property definition '" + line + "'");
+                }
             }
         }
 

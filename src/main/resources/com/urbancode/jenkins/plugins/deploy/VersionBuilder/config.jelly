@@ -1,6 +1,6 @@
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
 
-  <j:set var="helpURL" value="/plugin/ibm-ucdeploy-publisher"/>
+  <j:set var="helpURL" value="/plugin/ibm-ucdeploy-build-steps"/>
 
   <f:entry>
     <table width="100%">
