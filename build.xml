@@ -8,8 +8,8 @@
 
     <property environment="env"/>
 
-	<!-- ==================================================================
-         PROJECT CONFIGURATION 
+    <!-- ==================================================================
+         PROJECT CONFIGURATION
          ================================================================== -->
     <property name="project" value="${ant.project.name}"/>
     <property name="build.life.id" value="${env.AH_BUILD_LIFE_ID}"/>
@@ -19,7 +19,7 @@
     <property name="ahp.workflow.name" value="build workflow [${ahp.branch.name}]"/>
 
     <property name="MAVEN_HOME" value="${env.MAVEN_HOME}"/>
-	
+
     <!-- ==================================================================
          ENVIRONMENTAL DETECTION
          ================================================================== -->
@@ -31,11 +31,11 @@
             <os family="windows" />
         </not>
     </condition>
-	
-	<condition property="mvn" value="${MAVEN_HOME}/bin/mvn.bat">
-		<os family="windows" />
-	</condition>
-	<condition property="mvn" value="${MAVEN_HOME}/bin/mvn">
+
+    <condition property="mvn" value="${MAVEN_HOME}/bin/mvn.bat">
+        <os family="windows" />
+    </condition>
+    <condition property="mvn" value="${MAVEN_HOME}/bin/mvn">
         <not>
             <os family="windows" />
         </not>
@@ -83,7 +83,7 @@
     <!-- ==================================================================
          ARTIFACT HANDLING
          ================================================================== -->
-    <target name="resolve" unless="resolve.no" 
+    <target name="resolve" unless="resolve.no"
             description="Resolve all dependencies">
             <mkdir dir="${lib.dir}"/>
         <codestation:resolve
@@ -104,6 +104,7 @@
          ================================================================== -->
     <target name="prepare" depends="resolve">
         <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/uDeployRestClient.jar"/>
           <arg value="-DgroupId=uc-uDeployRestClient"/>
@@ -113,6 +114,7 @@
           <arg value="-DgeneratePom=true"/>
         </exec>
         <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/codestation-aggregate.jar"/>
           <arg value="-DgroupId=uc-codestation-aggregate"/>
@@ -122,6 +124,7 @@
           <arg value="-DgeneratePom=true"/>
         </exec>
         <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/replicated-codestation.jar"/>
           <arg value="-DgroupId=uc-replicated-codestation"/>
@@ -131,6 +134,7 @@
           <arg value="-DgeneratePom=true"/>
         </exec>
         <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/CommonsUtil.jar"/>
           <arg value="-DgroupId=uc-commons-util"/>
@@ -140,6 +144,7 @@
           <arg value="-DgeneratePom=true"/>
         </exec>
         <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/CommonsFileUtils.jar"/>
           <arg value="-DgroupId=uc-commons-fileutils"/>
@@ -149,6 +154,7 @@
           <arg value="-DgeneratePom=true"/>
         </exec>
         <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/HttpComponents-Util.jar"/>
           <arg value="-DgroupId=uc-httpcomponents-util"/>
@@ -158,6 +164,7 @@
           <arg value="-DgeneratePom=true"/>
         </exec>
         <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/jersey-core-1.12.jar"/>
           <arg value="-DgroupId=uc-jersey-core"/>
@@ -167,6 +174,7 @@
           <arg value="-DgeneratePom=true"/>
         </exec>
         <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/jersey-client-1.12.jar"/>
           <arg value="-DgroupId=uc-jersey-client"/>
@@ -176,6 +184,7 @@
           <arg value="-DgeneratePom=true"/>
         </exec>
         <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/jsr311-api-1.1.1.jar"/>
           <arg value="-DgroupId=uc-jsr311-api"/>
@@ -185,6 +194,7 @@
           <arg value="-DgeneratePom=true"/>
         </exec>
         <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
           <arg value="install:install-file"/>
           <arg value="-Dfile=lib/jettison-1.1.jar"/>
           <arg value="-DgroupId=uc-jettison"/>

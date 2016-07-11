@@ -10,12 +10,16 @@
 package com.urbancode.jenkins.plugins.deploy;
 
 import hudson.AbortException;
-import hudson.model.BuildListener;
+import hudson.model.TaskListener;
 import hudson.remoting.Callable;
 import hudson.remoting.VirtualChannel;
 
 import java.io.File;
 import java.util.UUID;
+
+import jenkins.security.Roles;
+
+import org.jenkinsci.remoting.RoleChecker;
 
 /**
  * This class runs the code to publish artifacts to a component version.
@@ -32,7 +36,7 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
     //**********************************************************************************************
     // INSTANCE
     //**********************************************************************************************
-    final private VersionHelper versionHelper;
+    final private ComponentHelper versionHelper;
     final private String baseDir;
     final private String fileIncludePatterns;
     final private String fileExcludePatterns;
@@ -40,7 +44,7 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
     final private String version;
     final private String description;
     final private String versionType;
-    final private BuildListener listener;
+    final private TaskListener listener;
 
     /**
      * Construct a Callable task
@@ -55,7 +59,7 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
      * @param listener Object to receive events that happen during a build
      */
     public PublishArtifactsCallable(
-        VersionHelper versionHelper,
+        ComponentHelper versionHelper,
         String baseDir,
         String fileIncludePatterns,
         String fileExcludePatterns,
@@ -63,7 +67,7 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
         String version,
         String description,
         String versionType,
-        BuildListener listener)
+        TaskListener listener)
     {
         if (fileIncludePatterns == null) {
             fileIncludePatterns = "";
@@ -139,5 +143,10 @@ public class PublishArtifactsCallable implements Callable<Boolean, Exception> {
         }
 
         return true;
+    }
+
+    @Override
+    public void checkRoles(RoleChecker checker) throws SecurityException {
+        checker.check(this,Roles.SLAVE);
     }
 }

@@ -1,23 +1,24 @@
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
   <j:set var="helpURL" value="/plugin/ibm-ucdeploy-build-steps"/>
 
-  <f:section title="IBM UrbanCode Deploy Build Steps Configuration">
+
+  <f:section title="IBM UrbanCode Deploy Build Steps Plugin Configuration">
     <f:entry title="UCD Servers">
       <f:repeatable name="sites" var="site" items="${descriptor.sites}">
         <table width="100%">
-          <f:entry title="Profile Name" help="${helpURL}/help-profile.html">
+          <f:entry title="Profile Name" help="${helpURL}/globalconfig-profile.html">
             <f:textbox name="profileName" value="${site.profileName}"/>
           </f:entry>
-          <f:entry title="IBM UrbanCode Deploy URL" help="${helpURL}/help-url.html">
+          <f:entry title="IBM UrbanCode Deploy URL" help="${helpURL}/globalconfig-url.html">
             <f:textbox name="url" value="${site.url}"/>
           </f:entry>
-          <f:entry title="User Name" help="${helpURL}/help-user.html">
+          <f:entry title="User Name" help="${helpURL}/globalconfig-user.html">
             <f:textbox name="user" value="${site.user}"/>
           </f:entry>
-          <f:entry title="Password" help="${helpURL}/help-password.html">
+          <f:entry title="Password" help="${helpURL}/globalconfig-password.html">
             <f:password name="password" value="${site.password}"/>
           </f:entry>
-          <f:entry title="Trust All Certificates" help="${helpURL}/help-trust.html">
+          <f:entry title="Trust All Certificates" help="${helpURL}/globalconfig-trust.html">
             <f:checkbox name="trustAllCerts" checked="${site.trustAllCerts}" value="${site.trustAllCerts}"/>
           </f:entry>
           <f:entry title="">

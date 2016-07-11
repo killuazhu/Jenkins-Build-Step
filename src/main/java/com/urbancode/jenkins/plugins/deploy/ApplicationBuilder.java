@@ -32,34 +32,14 @@ import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
-/**
- * Builder to create a component version in IBM UrbanCode Deploy
- * Sample {@link Builder}.
- *
- * <p>
- * When the user configures the project and enables this builder, {@link
- * DescriptorImplnewInstance(StaplerRequest)} is invoked and a new
- * {@link VersionBuilder} is created. The created instance is persisted to the
- * project configuration XML by using XStream, so this allows you to use
- * instance fields (like {@link name}) to remember the configuration.
- *
- * <p>
- * When a build is performed, the {@link perform(AbstractBuild, Launcher,
- * TaskListener)} method will be invoked.
- *
- */
-public class VersionBuilder extends Builder implements SimpleBuildStep {
+public class ApplicationBuilder extends Builder implements SimpleBuildStep{
+
     public static final GlobalConfig.GlobalConfigDescriptor GLOBALDESCRIPTOR = GlobalConfig.getGlobalConfigDescriptor();
 
     private String siteName;
-    private String component;
-    private String version;
-    private String baseDir;
-    private String fileIncludePatterns;
-    private String fileExcludePatterns;
-    private String properties;
+    private String application;
     private String description;
-    private Boolean incremental = false;
+    private String component;
 
     /**
      * Constructor used for data-binding fields from the corresponding
@@ -76,26 +56,16 @@ public class VersionBuilder extends Builder implements SimpleBuildStep {
      * @param incremental Creates an incremental component version
      */
     @DataBoundConstructor
-    public VersionBuilder(
+    public ApplicationBuilder(
             String siteName,
-            String component,
-            String version,
-            String baseDir,
-            String fileIncludePatterns,
-            String fileExcludePatterns,
-            String properties,
+            String application,
             String description,
-            Boolean incremental)
+            String component)
     {
         this.siteName = siteName;
-        this.component = component;
-        this.version = version;
-        this.baseDir = baseDir;
-        this.fileIncludePatterns = fileIncludePatterns;
-        this.fileExcludePatterns = fileExcludePatterns;
-        this.properties = properties;
+        this.application = application;
         this.description = description;
-        this.incremental = incremental;
+        this.component = component;
     }
 
     /*
@@ -117,55 +87,12 @@ public class VersionBuilder extends Builder implements SimpleBuildStep {
         this.siteName = siteName;
     }
 
-    public String getComponent() {
-        return component;
+    public String getApplication() {
+        return application;
     }
 
-    public void setComponent(String component) {
-        this.component = component;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String versionName) {
-        this.version = versionName;
-    }
-
-    public String getBaseDir() {
-        return baseDir;
-    }
-
-    public void setBaseDir(String baseDir) {
-        this.baseDir = baseDir;
-    }
-
-    public String getFileIncludePatterns() {
-        if (fileIncludePatterns == null || fileIncludePatterns.trim().length() == 0) {
-            fileIncludePatterns = "**/*";
-        }
-        return fileIncludePatterns;
-    }
-
-    public void setFileIncludePatterns(String fileIncludePatterns) {
-        this.fileIncludePatterns = fileIncludePatterns;
-    }
-
-    public String getFileExcludePatterns() {
-        return fileExcludePatterns;
-    }
-
-    public void setFileExcludePatterns(String fileExcludePatterns) {
-        this.fileExcludePatterns = fileExcludePatterns;
-    }
-
-    public String getProperties() {
-        return properties;
-    }
-
-    public void setProperties(String properties) {
-        this.properties = properties;
+    public void setApplication(String application) {
+        this.application = application;
     }
 
     public String getDescription() {
@@ -176,12 +103,12 @@ public class VersionBuilder extends Builder implements SimpleBuildStep {
         this.description = description;
     }
 
-    public void setIncremental(boolean incremental) {
-        this.incremental = incremental;
+    public String getComponent() {
+        return component;
     }
 
-    public boolean isIncremental() {
-        return incremental;
+    public void setComponent(String component) {
+        this.component = component;
     }
 
     /**
@@ -226,46 +153,13 @@ public class VersionBuilder extends Builder implements SimpleBuildStep {
 
         EnvVars envVars = build.getEnvironment(listener);
         UrbanDeploySite udSite = getSite();
-        ComponentHelper versionHelper = new ComponentHelper(udSite.getUri(), udSite.getClient(), listener);
+        ApplicationHelper appHelper = new ApplicationHelper(udSite.getUri(), udSite.getClient(), listener);
 
-        String resolvedComponent = envVars.expand(component);
-        String resolvedVersion = envVars.expand(version);
-        String resolvedBaseDir = envVars.expand(baseDir);
-        String resolvedFileIncludePatterns = envVars.expand(fileIncludePatterns);
-        String resolvedFileExcludePatterns = envVars.expand(fileExcludePatterns);
-        String resolvedProperties = envVars.expand(properties);
+        String resolvedApp = envVars.expand(application);
         String resolvedDescription = envVars.expand(description);
-        String versionType = "FULL";
+        String resolvedComponent = envVars.expand(component);
 
-        if (incremental) {
-            versionType = "INCREMENTAL";
-        }
-
-        PublishArtifactsCallable task = new PublishArtifactsCallable(
-                versionHelper,
-                resolvedBaseDir,
-                resolvedFileIncludePatterns,
-                resolvedFileExcludePatterns,
-                resolvedComponent,
-                resolvedVersion,
-                resolvedDescription,
-                versionType,
-                listener);
-
-        // task must run on the correct channel when pulling version files
-        task.callOnChannel(launcher.getChannel());
-
-        // create properties on version
-        versionHelper.setComponentVersionProperties(
-                resolvedComponent,
-                resolvedVersion,
-                resolvedProperties);
-
-        // add component version link
-        String linkName = "Jenkins Job " + build.getDisplayName();
-        String linkUrl = Hudson.getInstance().getRootUrl() + build.getUrl();
-        listener.getLogger().println("Adding Jenkins job link " + linkUrl);
-        versionHelper.addLinkToComp(resolvedComponent, resolvedVersion, linkName, linkUrl);
+        appHelper.createAppWithComponent(resolvedApp, resolvedDescription, resolvedComponent);
     }
 
     /**
@@ -274,9 +168,9 @@ public class VersionBuilder extends Builder implements SimpleBuildStep {
      *
      */
     @Extension
-    public static class VersionBuilderDescriptor extends BuildStepDescriptor<Builder> {
+    public static class AppBuilderDescriptor extends BuildStepDescriptor<Builder> {
 
-        public VersionBuilderDescriptor() {
+        public AppBuilderDescriptor() {
             load();
         }
 
@@ -290,7 +184,7 @@ public class VersionBuilder extends Builder implements SimpleBuildStep {
          */
         @Override
         public String getHelpFile() {
-            return "/plugin/ibm-ucdeploy-publisher/help-versionbuilder.html";
+            return "/plugin/ibm-ucdeploy-publisher/appbuilder.html";
         }
 
         /**
@@ -324,7 +218,7 @@ public class VersionBuilder extends Builder implements SimpleBuildStep {
          */
         @Override
         public String getDisplayName() {
-            return "UrbanCode Deploy - Create Component Version";
+            return "UrbanCode Deploy - Create Application";
         }
 
         /**

@@ -12,8 +12,9 @@ package com.urbancode.jenkins.plugins.deploy;
 import com.urbancode.ud.client.ApplicationClient;
 
 import hudson.AbortException;
-import hudson.model.BuildListener;
+import hudson.model.TaskListener;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +23,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
 /**
  * This class executes rest calls for deploying versions to UCD using
@@ -30,11 +33,60 @@ import org.apache.http.impl.client.DefaultHttpClient;
  *
  */
 @SuppressWarnings("deprecation") // Triggered by DefaultHttpClient
-public class DeploymentHelper {
+public class ApplicationHelper {
     ApplicationClient appClient;
+    TaskListener listener;
 
-    public DeploymentHelper(URI ucdUrl, DefaultHttpClient httpClient) {
+    public ApplicationHelper(URI ucdUrl, DefaultHttpClient httpClient, TaskListener listener) {
         appClient = new ApplicationClient(ucdUrl, httpClient);
+        this.listener = listener;
+    }
+
+    public void createAppWithComponent(String application, String description, String component)
+    throws AbortException {
+        JSONObject appObject = null;
+
+        try {
+            listener.getLogger().println("Checking the UCD server for existing application '" + application + "'");
+            appObject = appClient.getApplication(application);
+            listener.getLogger().println("The application '" + application + "' already exists on the UCD server with ");
+        }
+        catch (IOException ex) {
+            listener.getLogger().println("The application does not exist on the UCD server.");
+        }
+        catch (JSONException ex) {
+            throw new AbortException("An error occurred while checking the UCD server  for the application : "
+                    + ex.getMessage());
+        }
+
+        if (appObject == null) {
+            listener.getLogger().println("Creating new application '" + application + "'");
+            try {
+                UUID appUUID = appClient.createApplication(application, description, "", false);
+                listener.getLogger().println("Successfully created application '" + application + "' with UUID '"
+                        + appUUID);
+            }
+            catch (IOException ex) {
+                throw new AbortException("An error occurred while creating a new application : " + ex.getMessage());
+            }
+            catch (JSONException ex) {
+                throw new AbortException("An error occurred while processing the JSON object for a new application : "
+                        + ex.getMessage());
+            }
+        }
+
+        if (component != null && !component.isEmpty()) {
+            try {
+                listener.getLogger().println("Adding component '" + component + "' to application '"
+                        + application + "'");
+                appClient.addComponentToApplication(application, component);
+                listener.getLogger().println("Successfully added component.");
+            }
+            catch (IOException ex) {
+                throw new AbortException("An error occurred while adding the component to the application : "
+                        + ex.getMessage());
+            }
+        }
     }
 
     /**
@@ -47,7 +99,6 @@ public class DeploymentHelper {
      * @param process
      * @param componentVersions
      * @param version
-     * @param listener
      * @return The id of the application process request
      * @throws AbortException
      */
@@ -57,8 +108,7 @@ public class DeploymentHelper {
             Map<String, List<String>> componentVersions,
             String environment,
             Boolean onlyChanged,
-            String snapshot,
-            BuildListener listener)
+            String snapshot)
     throws AbortException {
         listener.getLogger().println("Creating application process deployment request.");
 

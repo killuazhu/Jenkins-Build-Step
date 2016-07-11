@@ -12,12 +12,14 @@ package com.urbancode.jenkins.plugins.deploy;
 import hudson.AbortException;
 import hudson.EnvVars;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
 import hudson.model.Descriptor.FormException;
 import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.tasks.Builder;
 import hudson.tasks.BuildStepDescriptor;
 
@@ -27,6 +29,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import jenkins.tasks.SimpleBuildStep;
 
 import net.sf.json.JSONObject;
 
@@ -47,10 +51,10 @@ import org.kohsuke.stapler.QueryParameter;
  *
  * <p>
  * When a build is performed, the {@link perform(AbstractBuild, Launcher,
- * BuildListener)} method will be invoked.
+ * TaskListener)} method will be invoked.
  *
  */
-public class DeploymentBuilder extends Builder {
+public class DeploymentBuilder extends Builder implements SimpleBuildStep {
     public static final GlobalConfig.GlobalConfigDescriptor GLOBALDESCRIPTOR = GlobalConfig.getGlobalConfigDescriptor();
 
     private String siteName;
@@ -192,10 +196,10 @@ public class DeploymentBuilder extends Builder {
      * @throws InterruptedException
      * @throws java.io.IOException {@inheritDoc}
      * @see hudson.tasks.BuildStep#perform(hudson.model.Build, hudson.Launcher,
-     *      hudson.model.BuildListener)
+     *      hudson.model.TaskListener)
      */
     @Override
-    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener)
+    public void perform(final Run<?, ?> build, FilePath workspace, Launcher launcher, final TaskListener listener)
     throws AbortException, InterruptedException, IOException {
         if (build.getResult() == Result.FAILURE || build.getResult() == Result.ABORTED) {
             throw new AbortException("Skip version deployment in IBM UrbanCode Deploy - build failed or aborted.");
@@ -204,7 +208,7 @@ public class DeploymentBuilder extends Builder {
         EnvVars envVars = build.getEnvironment(listener);
 
         UrbanDeploySite udSite = getSite();
-        DeploymentHelper deployHelper = new DeploymentHelper(udSite.getUri(), udSite.getClient());
+        ApplicationHelper deployHelper = new ApplicationHelper(udSite.getUri(), udSite.getClient(), listener);
 
         String resolvedDeployApp = envVars.expand(deployApp);
         String resolvedDeployProc = envVars.expand(deployProc);
@@ -259,8 +263,7 @@ public class DeploymentBuilder extends Builder {
                 resolvedComponentVersions,
                 resolvedDeployEnv,
                 onlyChanged,
-                resolvedSnapshot,
-                listener);
+                resolvedSnapshot);
 
         listener.getLogger().println("Deployment request id is: " + requestId);
         listener.getLogger().println("Deployment of application request " + requestId
@@ -292,8 +295,6 @@ public class DeploymentBuilder extends Builder {
                 + resolvedDeployApp + " in environment " + resolvedDeployEnv + " in " + duration + " seconds");
         listener.getLogger().println("The deployment result is " + deploymentResult
                 + ". See the UrbanCode Deploy deployment logs for details.");
-
-        return true;
     }
 
     /**

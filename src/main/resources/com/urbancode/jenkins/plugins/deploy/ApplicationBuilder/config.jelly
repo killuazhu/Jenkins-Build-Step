@@ -11,11 +11,14 @@
           </j:forEach>
         </select>
       </f:entry>
-      <f:entry title="Component" field="component" help="${helpURL}/importbuilder-component.html">
+      <f:entry title="Application Name" field="application" help="${helpURL}/appbuilder-application.html">
         <f:textbox/>
       </f:entry>
-      <f:entry title="Runtime Properties" field="properties" help="${helpURL}/importbuilder-properties.html">
-        <f:textarea/>
+      <f:entry title="Description" field="description" help="${helpURL}/appbuilder-description.html">
+        <f:textbox/>
+      </f:entry>
+      <f:entry title="Component" field="component" help="${helpURL}/appbuilder-component.html">
+        <f:textbox/>
       </f:entry>
     </table>
   </f:entry>

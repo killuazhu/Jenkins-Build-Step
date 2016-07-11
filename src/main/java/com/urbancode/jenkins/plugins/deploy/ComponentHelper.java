@@ -10,7 +10,7 @@
 package com.urbancode.jenkins.plugins.deploy;
 
 import hudson.AbortException;
-import hudson.model.BuildListener;
+import hudson.model.TaskListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,15 +38,67 @@ import com.urbancode.ud.client.VersionClient;
  *
  */
 @SuppressWarnings("deprecation") // Triggered by DefaultHttpClient
-public class VersionHelper {
+public class ComponentHelper {
     VersionClient versionClient;
     PropertyClient propClient;
     ComponentClient compClient;
+    TaskListener listener;
 
-    public VersionHelper(URI ucdUrl, DefaultHttpClient httpClient) {
+    public ComponentHelper(URI ucdUrl, DefaultHttpClient httpClient, TaskListener listener) {
         versionClient = new VersionClient(ucdUrl, httpClient);
         propClient = new PropertyClient(ucdUrl, httpClient);
         compClient = new ComponentClient(ucdUrl, httpClient);
+        this.listener = listener;
+    }
+
+    public void createComponent(
+            String component,
+            String description,
+            String template,
+            String sourceConfigPlugin,
+            String properties,
+            String versionType)
+    throws AbortException {
+        UUID componentUUID = null;
+
+        try {
+            listener.getLogger().println("Checking the UCD server for an existing component '" + component + "'");
+            componentUUID = compClient.getComponentUUID(component);
+            listener.getLogger().println("The component '" + component + "' already exists on the UCD server with "
+                    + "UUID '" + componentUUID + "'");
+        }
+        catch (IOException ex) {
+            listener.getLogger().println("The component does not exist on the UCD server.");
+        }
+        catch (JSONException ex) {
+            throw new AbortException("An error occurred while checking the UCD server for the component : "
+                    + ex.getMessage());
+        }
+
+        if (componentUUID == null) {
+            Map<String, String> propertiesToSet = readProperties(properties);
+
+            try {
+            listener.getLogger().println("Creating new component '" + component + "'");
+            compClient.createComponent(
+                    component,
+                    description,
+                    sourceConfigPlugin,
+                    versionType,
+                    template,
+                    -1,
+                    false,
+                    true,
+                    propertiesToSet);
+            }
+            catch (IOException ex) {
+                throw new AbortException("Failed to create new component '" + component + "' : " + ex.getMessage());
+            }
+            catch (JSONException ex) {
+                throw new AbortException("An error occurred while processing the JSON object for a new component : "
+                        + ex.getMessage());
+            }
+        }
     }
 
     /**
@@ -73,6 +125,8 @@ public class VersionHelper {
                     + version + "' on component '" + component + "' : " + ex.getMessage());
         }
 
+        listener.getLogger().println("Successfully created component version '" + version + "' on component '"
+                + component + "'");
         return versionId;
     }
 
@@ -154,14 +208,12 @@ public class VersionHelper {
      * @param component
      * @param version
      * @param properties
-     * @param listener
      * @throws AbortException
      */
     public void setComponentVersionProperties(
             String component,
             String version,
-            String properties,
-            BuildListener listener)
+            String properties)
     throws AbortException {
         Map<String, String> propertiesToSet = readProperties(properties);
 
@@ -267,6 +319,11 @@ public class VersionHelper {
      */
     public void importVersions(String component, String properties) throws AbortException {
         Map<String, String> propertiesToSet = readProperties(properties);
+        listener.getLogger().println("Using runtime properties " + propertiesToSet);
+
+        for (Map.Entry<String, String> entry : propertiesToSet.entrySet()) {
+            listener.getLogger().println("Key: " + entry.getKey() + " Value: " + entry.getValue());
+        }
 
         try {
             compClient.importComponentVersions(component, propertiesToSet);
@@ -275,7 +332,7 @@ public class VersionHelper {
             throw new AbortException("An error occurred while importing component versions on component '"
                     + component + "' : " + ex.getMessage());
         }
-        catch(JSONException ex) {
+        catch (JSONException ex) {
             throw new AbortException("An error occurred while creating JSON version import object : "
                     + ex.getMessage());
         }
