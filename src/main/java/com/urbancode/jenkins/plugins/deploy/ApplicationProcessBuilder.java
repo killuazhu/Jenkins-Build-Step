@@ -14,7 +14,6 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor.FormException;
 import hudson.model.Hudson;
@@ -32,48 +31,40 @@ import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.QueryParameter;
 
-/**
- * Builder to import component versions in IBM UrbanCode Deploy Sample
- * {@link Builder}.
- *
- * <p>
- * When the user configures the project and enables this builder, {@link
- * DescriptorImplnewInstance(StaplerRequest)} is invoked and a new
- * {@link ImportBuilder} is created. The created instance is persisted to the
- * project configuration XML by using XStream, so this allows you to use
- * instance fields (like {@link name}) to remember the configuration.
- *
- * <p>
- * When a build is performed, the {@link perform(AbstractBuild, Launcher,
- * TaskListener)} method will be invoked.
- *
- */
-public class ImportBuilder extends Builder implements SimpleBuildStep {
+public class ApplicationProcessBuilder extends Builder implements SimpleBuildStep{
+
     public static final GlobalConfig.GlobalConfigDescriptor GLOBALDESCRIPTOR = GlobalConfig.getGlobalConfigDescriptor();
 
     private String siteName;
-    private String component;
-    private String properties;
+    private String applicationProcess;
+    private String application;
+    private String description;
+    private String componentProcess;
 
     /**
      * Constructor used for data-binding fields from the corresponding
      * config.jelly
      *
      * @param siteName The profile name of the UrbanDeploy site
-     * @param component The name of the component on the UCD server
-     * @param properties Any properties to create on the new version
+     * @param applicationProcess The name to give the new application process
+     * @param application The name of the application to create the process on
+     * @param description A description for the new application process
+     * @param componentProcess The name of the component process to run
      */
     @DataBoundConstructor
-    public ImportBuilder(
+    public ApplicationProcessBuilder(
             String siteName,
-            String component,
-            String properties)
+            String applicationProcess,
+            String application,
+            String description,
+            String componentProcess)
     {
         this.siteName = siteName;
-        this.component = component;
-        this.properties = properties;
+        this.applicationProcess = applicationProcess;
+        this.application = application;
+        this.description = description;
+        this.componentProcess = componentProcess;
     }
 
     /*
@@ -95,20 +86,36 @@ public class ImportBuilder extends Builder implements SimpleBuildStep {
         this.siteName = siteName;
     }
 
-    public String getComponent() {
-        return component;
+    public String getApplicationProcess() {
+        return applicationProcess;
     }
 
-    public void setComponent(String component) {
-        this.component = component;
+    public void setApplicationProcess(String applicationProcess) {
+        this.applicationProcess = applicationProcess;
     }
 
-    public String getProperties() {
-        return properties;
+    public String getApplication() {
+        return application;
     }
 
-    public void setProperties(String properties) {
-        this.properties = properties;
+    public void setApplication(String application) {
+        this.application = application;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getComponentProcess() {
+        return componentProcess;
+    }
+
+    public void setComponentProcess(String componentProcess) {
+        this.componentProcess = componentProcess;
     }
 
     /**
@@ -148,31 +155,34 @@ public class ImportBuilder extends Builder implements SimpleBuildStep {
     public void perform(final Run<?, ?> build, FilePath workspace, Launcher launcher, final TaskListener listener)
     throws AbortException, InterruptedException, IOException {
         if (build.getResult() == Result.FAILURE || build.getResult() == Result.ABORTED) {
-            throw new AbortException("Skip component version import in IBM UrbanCode Deploy "
-                    + "- build failed or aborted.");
+            throw new AbortException("Skip artifacts upload to IBM UrbanCode Deploy - build failed or aborted.");
         }
 
         EnvVars envVars = build.getEnvironment(listener);
         UrbanDeploySite udSite = getSite();
-        ComponentHelper versionHelper = new ComponentHelper(udSite.getUri(), udSite.getClient(), listener);
+        ApplicationProcessHelper appHelper = new ApplicationProcessHelper(udSite.getUri(), udSite.getClient(), listener);
 
-        String resolvedComponent = envVars.expand(component);
-        String resolvedProperties = envVars.expand(properties);
+        String resolvedAppProcName = envVars.expand(applicationProcess);
+        String resolvedAppName = envVars.expand(application);
+        String resolvedDescription = envVars.expand(description);
+        String resolvedCompProcName = envVars.expand(componentProcess);
 
-        listener.getLogger().println("Running version import on component '" + resolvedComponent + "'");
-        versionHelper.importVersions(resolvedComponent, resolvedProperties);
-        listener.getLogger().println("Version import ran successfully.");
+        appHelper.createApplicationProcess(
+            resolvedAppProcName,
+            resolvedAppName,
+            resolvedDescription,
+            resolvedCompProcName);
     }
 
     /**
-     * This class holds the metadata for the ImportBuilder and allows it's data
+     * This class holds the metadata for the VersionBuilder and allows it's data
      * fields to persist
      *
      */
     @Extension
-    public static class ImportBuilderDescriptor extends BuildStepDescriptor<Builder> {
+    public static class AppBuilderDescriptor extends BuildStepDescriptor<Builder> {
 
-        public ImportBuilderDescriptor() {
+        public AppBuilderDescriptor() {
             load();
         }
 
@@ -186,7 +196,7 @@ public class ImportBuilder extends Builder implements SimpleBuildStep {
          */
         @Override
         public String getHelpFile() {
-            return "/plugin/ibm-ucdeploy-build-steps/importbuilder.html";
+            return "/plugin/ibm-ucdeploy-build-steps/appprocbuilder.html";
         }
 
         /**
@@ -199,7 +209,7 @@ public class ImportBuilder extends Builder implements SimpleBuildStep {
         }
 
         /**
-         * Bind ImportBuilder data fields to user defined values {@inheritDoc}
+         * Bind VersionBuilder data fields to user defined values {@inheritDoc}
          *
          * @param req {@inheritDoc}
          * @param formData {@inheritDoc}
@@ -220,7 +230,7 @@ public class ImportBuilder extends Builder implements SimpleBuildStep {
          */
         @Override
         public String getDisplayName() {
-            return "UrbanCode Deploy - Import Component Versions";
+            return "UrbanCode Deploy - Create Application Process";
         }
 
         /**

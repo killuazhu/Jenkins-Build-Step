@@ -1,0 +1,28 @@
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+
+  <j:set var="helpURL" value="/plugin/ibm-ucdeploy-build-steps"/>
+
+  <f:entry>
+    <table width="100%">
+      <f:entry title="IBM UrbanCode Deploy Server" help="${helpURL}/allbuilders-site.html">
+        <select class="setting-input" name="siteName">
+          <j:forEach var="s" items="${descriptor.getSites()}">
+            <f:option selected="${s.displayName==instance.siteName}">${s.displayName}</f:option>
+          </j:forEach>
+        </select>
+      </f:entry>
+      <f:entry title="Application Process Name" field="applicationProcess" help="${helpURL}/appprocbuilder-process.html">
+        <f:textbox/>
+      </f:entry>
+      <f:entry title="Application Name" field="application" help="${helpURL}/appprocbuilder-application.html">
+        <f:textbox/>
+      </f:entry>
+      <f:entry title="Description" field="description" help="${helpURL}/appprocbuilder-description.html">
+        <f:textbox/>
+      </f:entry>
+      <f:entry title="Component Process Name" field="componentProcess" help="${helpURL}/appprocbuilder-component.html">
+        <f:textbox/>
+      </f:entry>
+    </table>
+  </f:entry>
+</j:jelly>

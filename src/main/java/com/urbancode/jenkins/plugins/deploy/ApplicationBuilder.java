@@ -184,7 +184,7 @@ public class ApplicationBuilder extends Builder implements SimpleBuildStep{
          */
         @Override
         public String getHelpFile() {
-            return "/plugin/ibm-ucdeploy-publisher/appbuilder.html";
+            return "/plugin/ibm-ucdeploy-build-steps/appbuilder.html";
         }
 
         /**

@@ -328,7 +328,7 @@ public class DeploymentBuilder extends Builder implements SimpleBuildStep {
          */
         @Override
         public String getHelpFile() {
-            return "/plugin/ibm-ucdeploy-publisher/help-deploybuilder.html";
+            return "/plugin/ibm-ucdeploy-build-steps/deploybuilder.html";
         }
 
         /**

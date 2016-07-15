@@ -290,7 +290,7 @@ public class VersionBuilder extends Builder implements SimpleBuildStep {
          */
         @Override
         public String getHelpFile() {
-            return "/plugin/ibm-ucdeploy-publisher/help-versionbuilder.html";
+            return "/plugin/ibm-ucdeploy-build-steps/versionbuilder.html";
         }
 
         /**

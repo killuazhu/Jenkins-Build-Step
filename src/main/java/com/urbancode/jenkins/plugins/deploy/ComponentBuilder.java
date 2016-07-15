@@ -200,7 +200,7 @@ public class ComponentBuilder extends Builder implements SimpleBuildStep {
          */
         @Override
         public String getHelpFile() {
-            return "/plugin/ibm-ucdeploy-publisher/compbuilder.html";
+            return "/plugin/ibm-ucdeploy-build-steps/compbuilder.html";
         }
 
         /**
