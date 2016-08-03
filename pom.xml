@@ -139,6 +139,12 @@
         <artifactId>commons-lang3</artifactId>
         <version>3.1</version>
     </dependency>
+
+    <dependency>
+        <groupId>org.jenkins-ci.plugins.workflow</groupId>
+        <artifactId>workflow-step-api</artifactId>
+        <version>1.15</version>
+    </dependency>
         <dependency>
              <groupId>org.jenkins-ci.plugins.workflow</groupId>
              <artifactId>workflow-aggregator</artifactId>
