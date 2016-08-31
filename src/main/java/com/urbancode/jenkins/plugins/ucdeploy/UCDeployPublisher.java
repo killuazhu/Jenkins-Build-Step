@@ -41,6 +41,7 @@ import com.urbancode.jenkins.plugins.ucdeploy.DeliveryHelper.Pull;
 import com.urbancode.jenkins.plugins.ucdeploy.DeliveryHelper.Push;
 import com.urbancode.jenkins.plugins.ucdeploy.DeployHelper;
 import com.urbancode.jenkins.plugins.ucdeploy.DeployHelper.DeployBlock;
+import com.urbancode.jenkins.plugins.ucdeploy.DeployHelper.CreateSnapshotBlock;
 import com.urbancode.jenkins.plugins.ucdeploy.VersionHelper;
 import com.urbancode.jenkins.plugins.ucdeploy.VersionHelper.VersionBlock;;
 
@@ -210,8 +211,27 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
         }
     }
 
+
     public String getProcessComponent() {
         return getCreateProcess().getProcessComponent();
+    }
+
+    public CreateSnapshotBlock getCreateSnapshot() {
+        return getDeploy().getCreateSnapshotBlock();
+    }
+
+    public Boolean createSnapshotChecked() {
+        if (getCreateSnapshot() == null) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+
+    public String getSnapshotName() {
+        return getCreateSnapshot().getSnapshotName();
     }
 
     public String getDeployVersions() {
@@ -279,14 +299,14 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
     }
 
     /**
-     * This class holds the metadata for the VersionBuilder and allows it's data
+     * This class holds the metadata for the Publisher and allows it's data
      * fields to persist
      *
      */
     @Extension
-    public static class AppBuilderDescriptor extends BuildStepDescriptor<Builder> {
+    public static class UCDeployPublisherDescriptor extends BuildStepDescriptor<Builder> {
 
-        public AppBuilderDescriptor() {
+        public UCDeployPublisherDescriptor() {
             load();
         }
 
@@ -313,7 +333,7 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
         }
 
         /**
-         * Bind VersionBuilder data fields to user defined values {@inheritDoc}
+         * Bind data fields to user defined values {@inheritDoc}
          *
          * @param req {@inheritDoc}
          * @param formData {@inheritDoc}

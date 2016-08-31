@@ -56,6 +56,7 @@ public class DeployHelper {
         private String deployEnv;
         private String deployProc;
         private CreateProcessBlock createProcess;
+        private CreateSnapshotBlock createSnapshot;
         private String deployVersions;
         private Boolean deployOnlyChanged;
 
@@ -65,6 +66,7 @@ public class DeployHelper {
             String deployEnv,
             String deployProc,
             CreateProcessBlock createProcess,
+            CreateSnapshotBlock createSnapshot,
             String deployVersions,
             Boolean deployOnlyChanged)
         {
@@ -72,6 +74,7 @@ public class DeployHelper {
             this.deployEnv = deployEnv;
             this.deployProc = deployProc;
             this.createProcess = createProcess;
+            this.createSnapshot = createSnapshot;
             this.deployVersions = deployVersions;
             this.deployOnlyChanged = deployOnlyChanged;
         }
@@ -116,6 +119,19 @@ public class DeployHelper {
             }
         }
 
+        public CreateSnapshotBlock getCreateSnapshotBlock() {
+            return createSnapshot;
+        }
+
+        public Boolean createSnapshotChecked() {
+            if (getCreateSnapshotBlock() == null) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+
         public String getDeployVersions() {
             if (deployVersions != null) {
                 return deployVersions;
@@ -132,6 +148,19 @@ public class DeployHelper {
             else {
                 return false;
             }
+        }
+    }
+
+    public static class CreateSnapshotBlock {
+        private String snapshotName;
+
+        @DataBoundConstructor
+        public CreateSnapshotBlock(String snapshotName) {
+            this.snapshotName = snapshotName;
+        }
+
+        public String getSnapshotName() {
+            return snapshotName;
         }
     }
 
@@ -227,6 +256,28 @@ public class DeployHelper {
             catch (InterruptedException ex) {
                 throw new AbortException("Could not wait to check deployment result: " + ex.getMessage());
             }
+        }
+
+        // create snapshot of environment
+        if (deployBlock.createSnapshotChecked()) {
+            try {
+                CreateSnapshotBlock createSnapshot = deployBlock.getCreateSnapshotBlock();
+                String snapshotName = envVars.expand(createSnapshot.getSnapshotName());
+                String description = "Snapshot of successful build environment.";
+
+                listener.getLogger().println("Creating environment snapshot '" + snapshotName
+                        + "' in UrbanCode Deploy.");
+                appClient.createSnapshotOfEnvironment(deployEnv, deployApp, snapshotName, description);
+                listener.getLogger().println("Successfully created environment snapshot.");
+            }
+            catch (IOException ex) {
+                throw new AbortException("Failed to create envrionment snapshot: " + ex.getMessage());
+            }
+            catch (JSONException ex) {
+                throw new AbortException("An error occurred while processing the JSON object for the snapshot " +
+                                         "request: " + ex.getMessage());
+            }
+
         }
 
         long duration = (new Date().getTime() - startTime) / 1000;

@@ -111,6 +111,18 @@
                 </table>
               </f:block>
             </f:optionalBlock>
+            <f:optionalBlock name="createSnapshot"
+                             title="Create Snapshot of Build Environment"
+                             help="${helpURL}/deploy-snapshot.html"
+                             checked="${instance.createSnapshotChecked()}">
+              <f:block>
+                <table style="width:100%">
+                  <f:entry field="snapshotName" title="Environment Snapshot Name" help="${helpURL}/deploy-snapshot-name.html">
+                    <f:textbox default="${BUILD_ID}"/>
+                  </f:entry>
+                </table>
+              </f:block>
+            </f:optionalBlock>
             <f:entry field="deployVersions" title="Snapshot/Component Versions" help="${helpURL}/deploy-versions.html">
               <f:textarea/>
             </f:entry>
