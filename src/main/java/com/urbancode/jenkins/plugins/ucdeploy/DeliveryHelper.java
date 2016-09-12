@@ -64,7 +64,7 @@ public class DeliveryHelper {
 
             if (properties != null && !properties.isEmpty()) {
                 for (String line : properties.split("\n")) {
-                    String[] propDef = line.split("=");
+                    String[] propDef = line.split("=", 2);
 
                     if (propDef.length >= 2) {
                         String propName = propDef[0].trim();

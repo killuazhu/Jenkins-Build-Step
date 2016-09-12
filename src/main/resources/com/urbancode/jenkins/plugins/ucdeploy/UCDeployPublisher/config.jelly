@@ -13,23 +13,30 @@
       </f:entry>
       <f:optionalBlock name="component"
                        title="Create Component Version"
-                       help="${helpURL}/component.html"
+                       help="${helpURL}/create/help.html"
                        checked="${instance.componentChecked()}">
         <f:block>
           <table style="width:100%">
-            <f:entry field="componentName" title="Component Name" help="${helpURL}/component-name.html">
+            <f:entry field="componentName" title="Component Name" help="${helpURL}/create/component-name.html">
+              <f:textbox/>
+            </f:entry>
+            <f:entry field="componentTag" title="Tag" help="${helpURL}/create/tag.html">
               <f:textbox/>
             </f:entry>
             <f:optionalBlock name="createComponent"
                              title="Create As New Component"
-                             help="${helpURL}/component-create.html"
+                             help="${helpURL}/create/new/help.html"
                              checked="${instance.createComponentChecked()}">
               <f:block>
                 <table style="width:100%">
-                  <f:entry field="componentTemplate" title="Component Template" help="${helpURL}/component-template.html">
+                  <f:entry field="componentTemplate" 
+                           title="Component Template" 
+                           help="${helpURL}/create/new/template.html">
                     <f:textbox/>
                   </f:entry>
-                  <f:entry field="componentApplication" title="Add to Application" help="${helpURL}/component-application.html">
+                  <f:entry field="componentApplication" 
+                           title="Add to Application" 
+                           help="${helpURL}/create/new/app-name.html">
                     <f:textbox/>
                   </f:entry>
                 </table>
@@ -38,30 +45,30 @@
           </table>
         </f:block>
         <j:set var="currentDelivery" value="${instance.deliveryType}"/>
-        <f:dropdownList name="delivery" title="Delivery Mechanism" help="${helpURL}/component-delivery.html">
+        <f:dropdownList name="delivery" title="Delivery Mechanism" help="${helpURL}/create/delivery/help.html">
           <f:dropdownListBlock title="Push Files"
                                value="Push"
                                selected="${currentDelivery=='Push'}"
                                staplerClass="com.urbancode.jenkins.plugins.ucdeploy.DeliveryHelper$Push">
-            <f:entry field="pushVersion" title="Version Name" help="${helpURL}/component-push-version.html">
+            <f:entry field="pushVersion" title="Version Name" help="${helpURL}/create/delivery/push/version.html">
               <f:textbox default="${BUILD_NUMBER}"/>
             </f:entry>
-            <f:entry field="baseDir" title="Base Artifact Directory" help="${helpURL}/component-push-basedir.html">
+            <f:entry field="baseDir" title="Base Artifact Directory" help="${helpURL}/create/delivery/push/basedir.html">
               <f:textbox default="${WORKSPACE}"/>
             </f:entry>
-            <f:entry field="fileIncludePatterns" title="Include" help="${helpURL}/component-push-fileincludes.html">
+            <f:entry field="fileIncludePatterns" title="Include" help="${helpURL}/create/delivery/push/includes.html">
               <f:textarea default="**/*"/>
             </f:entry>
-            <f:entry field="fileExcludePatterns" title="Exclude" help="${helpURL}/component-push-fileexcludes.html">
+            <f:entry field="fileExcludePatterns" title="Exclude" help="${helpURL}/create/delivery/push/excludes.html">
               <f:textarea/>
             </f:entry>
-            <f:entry field="pushProperties" title="Version Properties" help="${helpURL}/component-push-properties.html">
+            <f:entry field="pushProperties" title="Version Properties" help="${helpURL}/create/delivery/push/properties.html">
               <f:textarea/>
             </f:entry>
-            <f:entry field="pushDescription" title="Version Description" help="${helpURL}/component-push-description.html">
+            <f:entry field="pushDescription" title="Version Description" help="${helpURL}/create/delivery/push/description.html">
               <f:textbox/>
             </f:entry>
-            <f:entry field="pushIncremental" title="Incremental Version" help="${helpURL}/component-push-incremental.html">
+            <f:entry field="pushIncremental" title="Incremental Version" help="${helpURL}/create/delivery/push/incremental.html">
               <f:checkbox/>
             </f:entry>
             </f:dropdownListBlock>
@@ -69,16 +76,16 @@
                                value="Pull"
                                selected="${currentDelivery=='Pull'}"
                                staplerClass="com.urbancode.jenkins.plugins.ucdeploy.DeliveryHelper$Pull">
-            <f:entry field="pullProperties" title="Runtime Properties" help="${helpURL}/component-pull-properties.html">
+            <f:entry field="pullProperties" title="Runtime Properties" help="${helpURL}/create/delivery/import/properties.html">
               <f:textarea/>
             </f:entry>
-            <f:entry field="pullSourceType" title="Source Configuration Type" help="${helpURL}/component-pull-sourcetype.html">
+            <f:entry field="pullSourceType" title="Source Configuration Type" help="${helpURL}/create/delivery/import/sourcetype.html">
               <f:textbox/>
             </f:entry>
-            <f:entry field="pullSourceProperties" title="Source Config Properties" help="${helpURL}/component-pull-sourceprops.html">
+            <f:entry field="pullSourceProperties" title="Source Config Properties" help="${helpURL}/create/delivery/import/sourceprops.html">
               <f:textarea/>
             </f:entry>
-            <f:entry field="pullIncremental" title="Incremental Versions" help="${helpURL}/component-pull-incremental.html">
+            <f:entry field="pullIncremental" title="Incremental Versions" help="${helpURL}/create/delivery/import/incremental.html">
               <f:checkbox/>
             </f:entry>
           </f:dropdownListBlock>
@@ -86,26 +93,26 @@
       </f:optionalBlock>
       <f:optionalBlock name="deploy"
                        title="Deploy"
-                       help="${helpURL}/deploy.html"
+                       help="${helpURL}/deploy/help.html"
                        checked="${instance.deployChecked()}">
         <f:block>
           <table style="width:100%">
-            <f:entry field="deployApp" title="Application Name" help="${helpURL}/deploy-app.html">
+            <f:entry field="deployApp" title="Application Name" help="${helpURL}/deploy/app.html">
               <f:textbox/>
             </f:entry>
-            <f:entry field="deployEnv" title="Environment Name" help="${helpURL}/deploy-env.html">
+            <f:entry field="deployEnv" title="Environment Name" help="${helpURL}/deploy/env.html">
               <f:textbox/>
             </f:entry>
-            <f:entry field="deployProc" title="Application Process Name" help="${helpURL}/deploy-appproc.html">
+            <f:entry field="deployProc" title="Application Process Name" help="${helpURL}/deploy/appproc.html">
               <f:textbox/>
             </f:entry>
             <f:optionalBlock name="createProcess"
                              title="Create As New Application Process"
-                             help="${helpURL}/deploy-appproc-create.html"
+                             help="${helpURL}/deploy/create/help.html"
                              checked="${instance.createProcessChecked()}">
               <f:block>
                 <table style="width:100%">
-                  <f:entry field="processComponent" title="Component Process Name" help="${helpURL}/deploy-appproc-comp.html">
+                  <f:entry field="processComponent" title="Component Process Name" help="${helpURL}/deploy/create/comp.html">
                     <f:textbox/>
                   </f:entry>
                 </table>
@@ -113,20 +120,20 @@
             </f:optionalBlock>
             <f:optionalBlock name="createSnapshot"
                              title="Create Snapshot of Build Environment"
-                             help="${helpURL}/deploy-snapshot.html"
+                             help="${helpURL}/deploy/snapshot/help.html"
                              checked="${instance.createSnapshotChecked()}">
               <f:block>
                 <table style="width:100%">
-                  <f:entry field="snapshotName" title="Environment Snapshot Name" help="${helpURL}/deploy-snapshot-name.html">
+                  <f:entry field="snapshotName" title="Environment Snapshot Name" help="${helpURL}/deploy/snapshot/name.html">
                     <f:textbox default="${BUILD_ID}"/>
                   </f:entry>
                 </table>
               </f:block>
             </f:optionalBlock>
-            <f:entry field="deployVersions" title="Snapshot/Component Versions" help="${helpURL}/deploy-versions.html">
+            <f:entry field="deployVersions" title="Snapshot/Component Versions" help="${helpURL}/deploy/versions.html">
               <f:textarea/>
             </f:entry>
-            <f:entry field="deployOnlyChanged" title="Only Changed Versions" help="${helpURL}/deploy-onlychanged.html">
+            <f:entry field="deployOnlyChanged" title="Only Changed Versions" help="${helpURL}/deploy/onlychanged.html">
               <f:checkbox default="true"/>
             </f:entry>
           </table>

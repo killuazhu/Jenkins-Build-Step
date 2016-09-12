@@ -235,4 +235,13 @@ public class ComponentHelper {
             }
         }
     }
+
+    public void addTag(String name, String tag) throws AbortException {
+        try {
+            compClient.addTagToComponent(name, tag);
+        }
+        catch (IOException ex) {
+            throw new AbortException("An error occurred while tagging the component : " + ex.getMessage());
+        }
+    }
 }

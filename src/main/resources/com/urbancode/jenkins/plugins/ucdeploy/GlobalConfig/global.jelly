@@ -6,19 +6,19 @@
     <f:entry title="UCD Servers">
       <f:repeatable name="sites" var="site" items="${descriptor.sites}">
         <table width="100%">
-          <f:entry title="Profile Name" help="${helpURL}/globalconfig-profile.html">
+          <f:entry title="Profile Name" help="${helpURL}/global/profile.html">
             <f:textbox name="profileName" value="${site.profileName}"/>
           </f:entry>
-          <f:entry title="IBM UrbanCode Deploy URL" help="${helpURL}/globalconfig-url.html">
+          <f:entry title="IBM UrbanCode Deploy URL" help="${helpURL}/global/url.html">
             <f:textbox name="url" value="${site.url}"/>
           </f:entry>
-          <f:entry title="User Name" help="${helpURL}/globalconfig-user.html">
+          <f:entry title="User Name" help="${helpURL}/global/user.html">
             <f:textbox name="user" value="${site.user}"/>
           </f:entry>
-          <f:entry title="Password" help="${helpURL}/globalconfig-password.html">
+          <f:entry title="Password" help="${helpURL}/global/password.html">
             <f:password name="password" value="${site.password}"/>
           </f:entry>
-          <f:entry title="Trust All Certificates" help="${helpURL}/globalconfig-trust.html">
+          <f:entry title="Trust All Certificates" help="${helpURL}/global/trust.html">
             <f:checkbox name="trustAllCerts" checked="${site.trustAllCerts}" value="${site.trustAllCerts}"/>
           </f:entry>
           <f:entry title="">

@@ -63,18 +63,34 @@ public class VersionHelper {
 
     public static class VersionBlock {
         private String componentName;
+        private String componentTag;
         private CreateComponentBlock createComponent;
         private DeliveryBlock delivery;
 
         @DataBoundConstructor
-        public VersionBlock(String componentName, CreateComponentBlock createComponent, DeliveryBlock delivery) {
+        public VersionBlock(String componentName,
+                            String componentTag,
+                            CreateComponentBlock createComponent,
+                            DeliveryBlock delivery)
+        {
             this.componentName = componentName;
+            this.componentTag = componentTag;
+
             this.createComponent = createComponent;
             this.delivery = delivery;
         }
 
         public String getComponentName() {
             return componentName;
+        }
+
+        public String getComponentTag() {
+            if (componentTag != null) {
+                return componentTag;
+            }
+            else {
+                return "";
+            }
         }
 
         public CreateComponentBlock getCreateComponentBlock() {
@@ -105,17 +121,24 @@ public class VersionHelper {
      *
      */
     public void createVersion(VersionBlock versionBlock, String linkName, String linkUrl) throws AbortException {
+        ComponentHelper componentHelper = new ComponentHelper(appClient, compClient, listener, envVars);
         String componentName = envVars.expand(versionBlock.getComponentName());
+        String componentTag = envVars.expand(versionBlock.getComponentTag());
+
         if (componentName == null || componentName.isEmpty()) {
             throw new AbortException("Component Name is a required property.");
         }
 
         // create component
         if (versionBlock.createComponentChecked()) {
-            ComponentHelper componentHelper = new ComponentHelper(appClient, compClient, listener, envVars);
             componentHelper.createComponent(componentName,
                                             versionBlock.getCreateComponentBlock(),
                                             versionBlock.getDeliveryBlock());
+        }
+
+        // tag component
+        if (componentTag != null && !componentTag.isEmpty()) {
+            componentHelper.addTag(componentName, componentTag);
         }
 
         // create version

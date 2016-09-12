@@ -17,7 +17,10 @@
     <property name="ahp.branch.name" value="master"/>
     <property name="ahp.project.name" value="${project}"/>
     <property name="ahp.workflow.name" value="build workflow [${ahp.branch.name}]"/>
-
+    <condition property="plugin.version" value="${env.AH_BUILD_LIFE_ID}" else="dev">
+        <isset property="env.AH_BUILD_LIFE_ID" />
+    </condition>
+    
     <property name="MAVEN_HOME" value="${env.MAVEN_HOME}"/>
 
     <!-- ==================================================================
@@ -54,7 +57,8 @@
     <!-- ==================================================================
          LOCATIONS OF BUILD ARTIFACTS
          ================================================================== -->
-    <property name="dist.dir" location="target" />
+    <property name="dist.dir" location="dist" />
+    <property name="target.dir" location="target" />
 
     <!-- ==================================================================
          TASK DEFAULTS
@@ -211,6 +215,7 @@
     <target name="jar-main" depends="prepare, set-version-property">
         <exec executable="${mvn}">
           <arg value="package"/>
+          <arg value="-Denv.buildLife=${plugin.version}"/>
         </exec>
     </target>
 
@@ -225,6 +230,7 @@
          ================================================================== -->
     <target name="clean">
         <delete dir="${dist.dir}" />
+        <delete dir="${target.dir}" />
         <delete dir="${build.dir}" />
     </target>
 
