@@ -2,7 +2,7 @@
 A plugin for Jenkins automation server to communicate with IBM UrbanCode Deploy
 
 ## Installation
-The plugin can be downloaded at the [IBM UrbanCode Plugins website](https://developer.ibm.com/urbancode/plugin/jenkins-build-step/ "Plugin Distributable")
+The plugin can be downloaded at the [IBM UrbanCode Plugins website](https://developer.ibm.com/urbancode/plugin/jenkins-2-0/ "Plugin Distributable")
 
 Full instructions can be found in the [Jenkins Build Step plugin documentation](https://developer.ibm.com/urbancode/docs/jenkins-build-step-integration-with-ibm-urbancode-deploy/ "Plugin Documentation")
 
