@@ -97,7 +97,14 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
     }
 
     public String getComponentName() {
-        return getComponent().getComponentName();
+        String componentName = getComponent().getComponentName();
+        
+        if (componentName == null) {
+            return "";
+        }
+        else {
+            return componentName;
+        }
     }
 
     public CreateComponentBlock getCreateComponent() {
@@ -114,11 +121,25 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
     }
 
     public String getComponentTemplate() {
-        return getCreateComponent().getComponentTemplate();
+        String componentTemplate = getCreateComponent().getComponentTemplate();
+        
+        if (componentTemplate == null) {
+            return "";
+        }
+        else {
+            return componentTemplate;
+        }
     }
 
     public String getComponentApplication() {
-        return getCreateComponent().getComponentApplication();
+        String componentApplication = getCreateComponent().getComponentApplication();
+        
+        if (componentApplication == null) {
+            return "";
+        }
+        else {
+            return componentApplication;
+        }
     }
 
     public DeliveryBlock getDelivery() {
@@ -126,51 +147,131 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
     }
 
     public String getDeliveryType() {
-        return getDelivery().getDeliveryType().name();
+        String deliveryType = getDelivery().getDeliveryType().name();
+        
+        if (deliveryType == null) {
+            return "";
+        }
+        else {
+            return deliveryType;
+        }
     }
 
     public String getPushVersion() {
-        return ((Push)getDelivery()).getPushVersion();
+        String pushVersion = ((Push)getDelivery()).getPushVersion();
+        
+        if (pushVersion == null) {
+            return "";
+        }
+        else {
+            return pushVersion;
+        }
     }
 
     public String getBaseDir() {
-        return ((Push)getDelivery()).getBaseDir();
+        String baseDir = ((Push)getDelivery()).getBaseDir();
+        
+        if (baseDir == null) {
+            return "";
+        }
+        else {
+            return baseDir;
+        }
     }
 
     public String getFileIncludePatterns() {
-        return ((Push)getDelivery()).getFileIncludePatterns();
+        String fileIncludePatterns = ((Push)getDelivery()).getFileIncludePatterns();
+        
+        if (fileIncludePatterns == null) {
+            return "";
+        }
+        else {
+            return fileIncludePatterns;
+        }
     }
 
     public String getFileExcludePatterns() {
-        return ((Push)getDelivery()).getFileExcludePatterns();
+        String fileExcludePatterns = ((Push)getDelivery()).getFileExcludePatterns();
+        
+        if (fileExcludePatterns == null) {
+            return "";
+        }
+        else {
+            return fileExcludePatterns;
+        }
     }
 
     public String getPushProperties() {
-        return ((Push)getDelivery()).getPushProperties();
+        String pushProperties = ((Push)getDelivery()).getPushProperties();
+        
+        if (pushProperties == null) {
+            return "";
+        }
+        else {
+            return pushProperties;
+        }
     }
 
     public String getPushDescription() {
-        return ((Push)getDelivery()).getPushDescription();
+        String pushDescription = ((Push)getDelivery()).getPushDescription();
+        
+        if (pushDescription == null) {
+            return "";
+        }
+        else {
+            return pushDescription;
+        }
     }
 
     public Boolean getPushIncremental() {
-        return ((Push)getDelivery()).getPushIncremental();
+        if (((Push)getDelivery()).getPushIncremental() == null) {
+            return false;
+        }
+        else {
+            return ((Push)getDelivery()).getPushIncremental();
+        }
     }
 
     public String getPullProperties() {
-        return ((Pull)getDelivery()).getPullProperties();
+        String pullProperties = ((Pull)getDelivery()).getPullProperties();
+        
+        if (pullProperties == null) {
+            return "";
+        }
+        else {
+            return pullProperties;
+        }
     }
 
     public String getpullSourceType() {
-        return ((Pull)getDelivery()).getPullSourceType();
+        String pullSourceType = ((Pull)getDelivery()).getPullSourceType();
+        
+        if (pullSourceType == null) {
+            return "";
+        }
+        else {
+            return pullSourceType;
+        }
     }
 
     public String getPullSourceProperties() {
-        return ((Pull)getDelivery()).getPullSourceProperties();
+        String pullSourceProperties = ((Pull)getDelivery()).getPullSourceProperties();
+        
+        if (pullSourceProperties == null) {
+            return "";
+        }
+        else {
+            return pullSourceProperties;
+        }
     }
 
     public Boolean getPullIncremental() {
-        return ((Pull)getDelivery()).getPullIncremental();
+        if (((Pull)getDelivery()).getPullIncremental() == null) {
+            return false;
+        }
+        else {
+            return ((Pull)getDelivery()).getPullIncremental();
+        }
     }
 
     public DeployBlock getDeploy() {
@@ -187,15 +288,36 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
     }
 
     public String getDeployApp() {
-        return getDeploy().getDeployApp();
+        String deployApp = getDeploy().getDeployApp();
+        
+        if (deployApp == null) {
+            return "";
+        }
+        else {
+            return deployApp;
+        }
     }
 
     public String getDeployEnv() {
-        return getDeploy().getDeployEnv();
+        String deployEnv = getDeploy().getDeployEnv();
+        
+        if (deployEnv == null) {
+            return "";
+        }
+        else {
+            return deployEnv;
+        }
     }
 
     public String getDeployProc() {
-        return getDeploy().getDeployProc();
+        String deployProc = getDeploy().getDeployProc();
+        
+        if (deployProc == null) {
+            return "";
+        }
+        else {
+            return deployProc;
+        }
     }
 
     public CreateProcessBlock getCreateProcess() {
@@ -213,7 +335,14 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
 
 
     public String getProcessComponent() {
-        return getCreateProcess().getProcessComponent();
+        String processComponent = getCreateProcess().getProcessComponent();
+        
+        if (processComponent == null) {
+            return "";
+        }
+        else {
+            return processComponent;
+        }
     }
 
     public CreateSnapshotBlock getCreateSnapshot() {
@@ -231,15 +360,34 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
 
 
     public String getSnapshotName() {
-        return getCreateSnapshot().getSnapshotName();
+        String snapshotName = getCreateSnapshot().getSnapshotName();
+        
+        if (snapshotName == null) {
+            return "";
+        }
+        else {
+            return snapshotName;
+        }
     }
 
     public String getDeployVersions() {
-        return getDeploy().getDeployVersions();
+        String deployVersions = getDeploy().getDeployVersions();
+        
+        if (deployVersions == null) {
+            return "";
+        }
+        else {
+            return deployVersions;
+        }
     }
 
     public Boolean getDeployOnlyChanged() {
-        return getDeploy().getDeployOnlyChanged();
+        if (getDeploy().getDeployOnlyChanged() == null) {
+            return false;
+        }
+        else {
+            return getDeploy().getDeployOnlyChanged();
+        }
     }
 
     /**
