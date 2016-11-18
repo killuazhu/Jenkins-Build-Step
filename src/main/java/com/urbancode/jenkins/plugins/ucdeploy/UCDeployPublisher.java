@@ -15,9 +15,11 @@ import hudson.AbortException;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
+import hudson.FilePath.FileCallable;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor.FormException;
+import hudson.remoting.VirtualChannel;
 import hudson.model.Hudson;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -27,10 +29,12 @@ import hudson.tasks.BuildStepDescriptor;
 
 import jenkins.tasks.SimpleBuildStep;
 
+import java.io.File;
 import java.io.IOException;
 
 import net.sf.json.JSONObject;
 
+import org.jenkinsci.remoting.RoleChecker;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -45,7 +49,7 @@ import com.urbancode.jenkins.plugins.ucdeploy.DeployHelper.CreateSnapshotBlock;
 import com.urbancode.jenkins.plugins.ucdeploy.VersionHelper;
 import com.urbancode.jenkins.plugins.ucdeploy.VersionHelper.VersionBlock;;
 
-public class UCDeployPublisher extends Builder implements SimpleBuildStep{
+public class UCDeployPublisher extends Builder implements SimpleBuildStep {
 
     public static final GlobalConfig.GlobalConfigDescriptor GLOBALDESCRIPTOR = GlobalConfig.getGlobalConfigDescriptor();
 
@@ -57,9 +61,12 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
      * Constructor used for data-binding fields from the corresponding
      * config.jelly
      *
-     * @param siteName The profile name of the UrbanDeploy site
-     * @param component The object holding the Create Version Block structure
-     * @param deploy The object holding the Deploy Block structure
+     * @param siteName
+     *            The profile name of the UrbanDeploy site
+     * @param component
+     *            The object holding the Create Version Block structure
+     * @param deploy
+     *            The object holding the Deploy Block structure
      */
     @DataBoundConstructor
     public UCDeployPublisher(String siteName, VersionBlock component, DeployBlock deploy) {
@@ -88,23 +95,22 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
     }
 
     public Boolean componentChecked() {
-        if (getComponent() == null) {
-            return false;
-        }
-        else {
+        if (getComponent() != null) {
             return true;
         }
+
+        return false;
     }
 
     public String getComponentName() {
-        String componentName = getComponent().getComponentName();
-        
-        if (componentName == null) {
-            return "";
+        String componentName = "";
+        String value = getComponent().getComponentName();
+
+        if (value != null) {
+            componentName = value;
         }
-        else {
-            return componentName;
-        }
+
+        return componentName;
     }
 
     public CreateComponentBlock getCreateComponent() {
@@ -112,34 +118,33 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
     }
 
     public Boolean createComponentChecked() {
-        if (getCreateComponent() == null) {
-            return false;
-        }
-        else {
+        if (getCreateComponent() != null) {
             return true;
         }
+
+        return false;
     }
 
     public String getComponentTemplate() {
-        String componentTemplate = getCreateComponent().getComponentTemplate();
-        
-        if (componentTemplate == null) {
-            return "";
+        String componentTemplate = "";
+        String value = getCreateComponent().getComponentTemplate();
+
+        if (value != null) {
+            componentTemplate = value;
         }
-        else {
-            return componentTemplate;
-        }
+
+        return componentTemplate;
     }
 
     public String getComponentApplication() {
-        String componentApplication = getCreateComponent().getComponentApplication();
-        
-        if (componentApplication == null) {
-            return "";
+        String componentApplication = "";
+        String value = getCreateComponent().getComponentApplication();
+
+        if (value != null) {
+            componentApplication = value;
         }
-        else {
-            return componentApplication;
-        }
+
+        return componentApplication;
     }
 
     public DeliveryBlock getDelivery() {
@@ -147,84 +152,84 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
     }
 
     public String getDeliveryType() {
-        String deliveryType = getDelivery().getDeliveryType().name();
-        
-        if (deliveryType == null) {
-            return "";
+        String deliveryType = "";
+        String value = getDelivery().getDeliveryType().name();
+
+        if (value != null) {
+            deliveryType = value;
         }
-        else {
-            return deliveryType;
-        }
+
+        return deliveryType;
     }
 
     public String getPushVersion() {
-        String pushVersion = ((Push)getDelivery()).getPushVersion();
-        
-        if (pushVersion == null) {
-            return "";
+        String pushVersion = "";
+        String value = ((Push)getDelivery()).getPushVersion();
+
+        if (value != null) {
+            pushVersion = value;
         }
-        else {
-            return pushVersion;
-        }
+
+        return pushVersion;
     }
 
     public String getBaseDir() {
-        String baseDir = ((Push)getDelivery()).getBaseDir();
-        
-        if (baseDir == null) {
-            return "";
+        String baseDir = "";
+        String value = ((Push)getDelivery()).getBaseDir();
+
+        if (value != null) {
+            baseDir = value;
         }
-        else {
-            return baseDir;
-        }
+
+        return baseDir;
     }
 
     public String getFileIncludePatterns() {
-        String fileIncludePatterns = ((Push)getDelivery()).getFileIncludePatterns();
-        
-        if (fileIncludePatterns == null) {
-            return "";
+        String fileIncludePatterns = "";
+        String value = ((Push)getDelivery()).getFileIncludePatterns();
+
+        if (value != null) {
+            fileIncludePatterns = value;
         }
-        else {
-            return fileIncludePatterns;
-        }
+
+        return fileIncludePatterns;
     }
 
     public String getFileExcludePatterns() {
-        String fileExcludePatterns = ((Push)getDelivery()).getFileExcludePatterns();
-        
-        if (fileExcludePatterns == null) {
-            return "";
+        String fileExcludePatterns = "";
+        String value = ((Push)getDelivery()).getFileExcludePatterns();
+
+        if (value != null) {
+            fileExcludePatterns = value;
         }
-        else {
-            return fileExcludePatterns;
-        }
+
+        return fileExcludePatterns;
     }
 
     public String getPushProperties() {
-        String pushProperties = ((Push)getDelivery()).getPushProperties();
-        
-        if (pushProperties == null) {
-            return "";
+        String pushProperties = "";
+        String value = ((Push)getDelivery()).getPushProperties();
+
+        if (value != null) {
+            pushProperties = value;
         }
-        else {
-            return pushProperties;
-        }
+
+        return pushProperties;
     }
 
     public String getPushDescription() {
-        String pushDescription = ((Push)getDelivery()).getPushDescription();
-        
-        if (pushDescription == null) {
-            return "";
+        String pushDescription = "";
+        String value = ((Push)getDelivery()).getPushDescription();
+
+        if (value != null) {
+            pushDescription = value;
         }
-        else {
-            return pushDescription;
-        }
+
+        return pushDescription;
     }
 
     public Boolean getPushIncremental() {
-        if (((Push)getDelivery()).getPushIncremental() == null) {
+        if (((Push)getDelivery()).getPushIncremental() != null) {
             return false;
         }
         else {
@@ -233,36 +238,36 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
     }
 
     public String getPullProperties() {
-        String pullProperties = ((Pull)getDelivery()).getPullProperties();
-        
-        if (pullProperties == null) {
-            return "";
+        String pullProperties = "";
+        String value = ((Pull)getDelivery()).getPullProperties();
+
+        if (value != null) {
+            pullProperties = value;
         }
-        else {
-            return pullProperties;
-        }
+
+        return pullProperties;
     }
 
     public String getpullSourceType() {
-        String pullSourceType = ((Pull)getDelivery()).getPullSourceType();
-        
-        if (pullSourceType == null) {
-            return "";
+        String pullSourceType = "";
+        String value = ((Pull)getDelivery()).getPullSourceType();
+
+        if (value != null) {
+            pullSourceType = value;
         }
-        else {
-            return pullSourceType;
-        }
+
+        return pullSourceType;
     }
 
     public String getPullSourceProperties() {
-        String pullSourceProperties = ((Pull)getDelivery()).getPullSourceProperties();
-        
-        if (pullSourceProperties == null) {
-            return "";
+        String pullSourceProperties = "";
+        String value = ((Pull)getDelivery()).getPullSourceProperties();
+
+        if (value != null) {
+            pullSourceProperties = value;
         }
-        else {
-            return pullSourceProperties;
-        }
+
+        return pullSourceProperties;
     }
 
     public Boolean getPullIncremental() {
@@ -279,45 +284,44 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
     }
 
     public Boolean deployChecked() {
-        if (getDeploy() == null) {
-            return false;
-        }
-        else {
+        if (getDeploy() != null) {
             return true;
         }
+
+        return false;
     }
 
     public String getDeployApp() {
-        String deployApp = getDeploy().getDeployApp();
-        
-        if (deployApp == null) {
-            return "";
+        String deployApp = "";
+        String value = getDeploy().getDeployApp();
+
+        if (value != null) {
+            deployApp = value;
         }
-        else {
-            return deployApp;
-        }
+
+        return deployApp;
     }
 
     public String getDeployEnv() {
-        String deployEnv = getDeploy().getDeployEnv();
-        
-        if (deployEnv == null) {
-            return "";
+        String deployEnv = "";
+        String value = getDeploy().getDeployEnv();
+
+        if (value != null) {
+            deployEnv = value;
         }
-        else {
-            return deployEnv;
-        }
+
+        return deployEnv;
     }
 
     public String getDeployProc() {
-        String deployProc = getDeploy().getDeployProc();
-        
-        if (deployProc == null) {
-            return "";
+        String deployProc = "";
+        String value = getDeploy().getDeployProc();
+
+        if (value != null) {
+            deployProc = value;
         }
-        else {
-            return deployProc;
-        }
+
+        return deployProc;
     }
 
     public CreateProcessBlock getCreateProcess() {
@@ -325,24 +329,23 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
     }
 
     public Boolean createProcessChecked() {
-        if (getCreateProcess() == null) {
-            return false;
-        }
-        else {
+        if (getCreateProcess() != null) {
             return true;
         }
+
+        return false;
     }
 
 
     public String getProcessComponent() {
-        String processComponent = getCreateProcess().getProcessComponent();
-        
-        if (processComponent == null) {
-            return "";
+        String processComponent = "";
+        String value = getCreateProcess().getProcessComponent();
+
+        if (value != null) {
+            processComponent = value;
         }
-        else {
-            return processComponent;
-        }
+
+        return processComponent;
     }
 
     public CreateSnapshotBlock getCreateSnapshot() {
@@ -350,35 +353,34 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
     }
 
     public Boolean createSnapshotChecked() {
-        if (getCreateSnapshot() == null) {
-            return false;
-        }
-        else {
+        if (getCreateSnapshot() != null) {
             return true;
         }
+
+        return false;
     }
 
 
     public String getSnapshotName() {
-        String snapshotName = getCreateSnapshot().getSnapshotName();
-        
-        if (snapshotName == null) {
-            return "";
+        String snapshotName = "";
+        String value = getCreateSnapshot().getSnapshotName();
+
+        if (value != null) {
+            snapshotName = value;
         }
-        else {
-            return snapshotName;
-        }
+
+        return snapshotName;
     }
 
     public String getDeployVersions() {
-        String deployVersions = getDeploy().getDeployVersions();
-        
-        if (deployVersions == null) {
-            return "";
+        String deployVersions = "";
+        String value = getDeploy().getDeployVersions();
+
+        if (value != null) {
+            deployVersions = value;
         }
-        else {
-            return deployVersions;
-        }
+
+        return deployVersions;
     }
 
     public Boolean getDeployOnlyChanged() {
@@ -419,30 +421,84 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
      * @param listener
      * @return A boolean to represent if the build can continue
      * @throws InterruptedException
-     * @throws java.io.IOException {@inheritDoc}
+     * @throws java.io.IOException
+     *             {@inheritDoc}
      * @see hudson.tasks.BuildStep#perform(hudson.model.Build, hudson.Launcher,
      *      hudson.model.TaskListener)
      */
     @Override
     public void perform(final Run<?, ?> build, FilePath workspace, Launcher launcher, final TaskListener listener)
-    throws AbortException, InterruptedException, IOException {
+            throws AbortException, InterruptedException, IOException {
         if (build.getResult() == Result.FAILURE || build.getResult() == Result.ABORTED) {
             throw new AbortException("Skip artifacts upload to IBM UrbanCode Deploy - build failed or aborted.");
         }
 
-        EnvVars envVars = build.getEnvironment(listener);
         UCDeploySite udSite = getSite();
+        EnvVars envVars = build.getEnvironment(listener);
 
-        if (componentChecked()) {
-            VersionHelper versionHelper = new VersionHelper(udSite.getUri(), udSite.getClient(), listener, envVars);
-            versionHelper.createVersion(getComponent(),
-                                        "Jenkins Build " + build.getDisplayName(),
-                                        Hudson.getInstance().getRootUrl() + build.getUrl());
+        if (componentChecked() ) {
+            String buildUrl = Hudson.getInstance().getRootUrl() + build.getUrl();
+            PublishArtifactsCallable task = new PublishArtifactsCallable(
+                    buildUrl,
+                    build.getDisplayName(),
+                    udSite,
+                    getComponent(),
+                    envVars,
+                    listener);
+
+            workspace.act(task);
         }
 
         if (deployChecked()) {
             DeployHelper deployHelper = new DeployHelper(udSite.getUri(), udSite.getClient(), listener, envVars);
             deployHelper.deployVersion(getDeploy());
+        }
+    }
+
+    /**
+     * Callable class that can be serialized and executed on a remote node
+     *
+     */
+    private static class PublishArtifactsCallable implements FileCallable<Boolean> {
+        private static final long serialVersionUID = 1L;
+        String buildUrl;
+        String buildName;
+        UCDeploySite udSite;
+        VersionBlock component;
+        EnvVars envVars;
+        TaskListener listener;
+
+        public PublishArtifactsCallable(
+                String buildUrl,
+                String buildName,
+                UCDeploySite udSite,
+                VersionBlock component,
+                EnvVars envVars,
+                TaskListener listener)
+        {
+            this.buildUrl = buildUrl;
+            this.buildName = buildName;
+            this.udSite = udSite;
+            this.component = component;
+            this.envVars = envVars;
+            this.listener = listener;
+        }
+
+        /**
+         * Check the role of the executing node to follow jenkins new file access rules
+         */
+        @Override
+        public void checkRoles(RoleChecker checker) throws SecurityException {
+            this.checkRoles(checker);
+        }
+
+        @Override
+        public Boolean invoke(File workspace, VirtualChannel node) throws IOException, InterruptedException {
+
+            VersionHelper versionHelper = new VersionHelper(udSite.getUri(), udSite.getClient(), listener, envVars);
+            versionHelper.createVersion(component, "Jenkins Build " + buildName, buildUrl);
+
+            return true;
         }
     }
 
@@ -483,8 +539,10 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
         /**
          * Bind data fields to user defined values {@inheritDoc}
          *
-         * @param req {@inheritDoc}
-         * @param formData {@inheritDoc}
+         * @param req
+         *            {@inheritDoc}
+         * @param formData
+         *            {@inheritDoc}
          * @return {@inheritDoc}
          * @see hudson.model.Descriptor#configure(org.kohsuke.stapler.StaplerRequest)
          */
@@ -508,7 +566,8 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep{
         /**
          * {@inheritDoc}
          *
-         * @param jobType {@inheritDoc}
+         * @param jobType
+         *            {@inheritDoc}
          * @return {@inheritDoc}
          */
         @Override

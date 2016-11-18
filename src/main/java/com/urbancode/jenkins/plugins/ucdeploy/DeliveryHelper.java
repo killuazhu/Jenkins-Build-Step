@@ -20,6 +20,7 @@ import hudson.model.Descriptor;
 import jenkins.model.Jenkins;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -28,15 +29,16 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * This class provides the structure and function around deployment control in
- * IBM UrbanCode Deploy via uDeployRestClient abstracted REST callsimport org.codehaus.jettison.json.JSONException;
+ * IBM UrbanCode Deploy via uDeployRestClient abstracted REST calls import
+ * org.codehaus.jettison.json.JSONException;
  *
  */
 @SuppressWarnings("deprecation") // Triggered by DefaultHttpClient
-public class DeliveryHelper {
+public class DeliveryHelper implements Serializable {
 
     public DeliveryHelper() {}
 
-    public static abstract class DeliveryBlock implements ExtensionPoint, Describable<DeliveryBlock>{
+    public static abstract class DeliveryBlock implements ExtensionPoint, Describable<DeliveryBlock>, Serializable {
         public enum DeliveryType { Push, Pull }
         private DeliveryType deliveryType;
 

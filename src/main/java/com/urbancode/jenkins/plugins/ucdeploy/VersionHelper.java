@@ -17,6 +17,7 @@ import hudson.model.TaskListener;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +40,9 @@ import com.urbancode.ud.client.PropertyClient;
 import com.urbancode.ud.client.VersionClient;
 
 /**
- * This class provides the structure and function around version control in
- * IBM UrbanCode Deploy via uDeployRestClient abstracted REST callsimport org.codehaus.jettison.json.JSONException;
+ * This class provides the structure and function around version control in IBM
+ * UrbanCode Deploy via uDeployRestClient abstracted REST calls import
+ * org.codehaus.jettison.json.JSONException;
  *
  */
 @SuppressWarnings("deprecation") // Triggered by DefaultHttpClient
@@ -61,7 +63,7 @@ public class VersionHelper {
         this.envVars = envVars;
     }
 
-    public static class VersionBlock {
+    public static class VersionBlock implements Serializable {
         private String componentName;
         private String componentTag;
         private CreateComponentBlock createComponent;

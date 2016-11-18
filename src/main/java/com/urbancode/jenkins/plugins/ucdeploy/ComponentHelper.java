@@ -16,6 +16,7 @@ import hudson.EnvVars;
 import hudson.model.TaskListener;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -33,7 +34,8 @@ import com.urbancode.ud.client.ComponentClient;
 
 /**
  * This class provides the structure and function around component control in
- * IBM UrbanCode Deploy via uDeployRestClient abstracted REST callsimport org.codehaus.jettison.json.JSONException;
+ * IBM UrbanCode Deploy via uDeployRestClient abstracted REST callsimport
+ * org.codehaus.jettison.json.JSONException;
  *
  */
 @SuppressWarnings("deprecation") // Triggered by DefaultHttpClient
@@ -47,14 +49,15 @@ public class ComponentHelper {
     private Boolean importAutomatically = false;
     private Boolean useVfs = true;
 
-    public ComponentHelper(ApplicationClient appClient, ComponentClient compClient, TaskListener listener, EnvVars envVars) {
+    public ComponentHelper(ApplicationClient appClient, ComponentClient compClient, TaskListener listener,
+            EnvVars envVars) {
         this.appClient = appClient;
         this.compClient = compClient;
         this.listener = listener;
         this.envVars = envVars;
     }
 
-    public static class CreateComponentBlock {
+    public static class CreateComponentBlock implements Serializable {
         private String componentTemplate;
         private String componentApplication;
 
@@ -67,8 +70,7 @@ public class ComponentHelper {
         public String getComponentTemplate() {
             if (componentTemplate != null) {
                 return componentTemplate;
-            }
-            else {
+            } else {
                 return "";
             }
         }
@@ -76,17 +78,14 @@ public class ComponentHelper {
         public String getComponentApplication() {
             if (componentApplication != null) {
                 return componentApplication;
-            }
-            else {
+            } else {
                 return "";
             }
         }
     }
 
-    public void createComponent(String name,
-                                CreateComponentBlock componentBlock,
-                                DeliveryBlock deliveryBlock)
-    throws AbortException {
+    public void createComponent(String name, CreateComponentBlock componentBlock, DeliveryBlock deliveryBlock)
+            throws AbortException {
         // definitions needed for ComponentClient createComponent method
         String componentName;
         String description;
@@ -96,7 +95,7 @@ public class ComponentHelper {
         int templateVersion;
         Boolean importAutomatically;
         Boolean useVfs;
-        Map<String,String> properties;
+        Map<String, String> properties;
 
         // default values
         description = this.description;
@@ -111,30 +110,25 @@ public class ComponentHelper {
         // properties based on delivery type
         if (deliveryBlock == null) {
             throw new AbortException("You must specify a Delivery Type.");
-        }
-        else if (deliveryBlock.getDeliveryType() == DeliveryBlock.DeliveryType.Push) {
-            Push pushBlock = (Push)deliveryBlock;
+        } else if (deliveryBlock.getDeliveryType() == DeliveryBlock.DeliveryType.Push) {
+            Push pushBlock = (Push) deliveryBlock;
             sourceConfigPlugin = "";
             if (pushBlock.getPushIncremental()) {
                 defaultVersionType = "INCREMENTAL";
-            }
-            else {
+            } else {
                 defaultVersionType = "FULL";
             }
-            properties = new HashMap<String,String>();
-        }
-        else if (deliveryBlock.getDeliveryType() == DeliveryBlock.DeliveryType.Pull) {
-            Pull pullBlock = (Pull)deliveryBlock;
+            properties = new HashMap<String, String>();
+        } else if (deliveryBlock.getDeliveryType() == DeliveryBlock.DeliveryType.Pull) {
+            Pull pullBlock = (Pull) deliveryBlock;
             sourceConfigPlugin = envVars.expand(pullBlock.getPullSourceType());
             if (pullBlock.getPullIncremental()) {
                 defaultVersionType = "INCREMENTAL";
-            }
-            else {
+            } else {
                 defaultVersionType = "FULL";
             }
             properties = DeliveryBlock.mapProperties(envVars.expand(pullBlock.getPullSourceProperties()));
-        }
-        else {
+        } else {
             throw new AbortException("Invalid Delivery Type: " + deliveryBlock.getDeliveryType());
         }
 
@@ -143,36 +137,27 @@ public class ComponentHelper {
         try {
             listener.getLogger().println("Checking the UCD server for an existing component '" + componentName + "'");
             componentUUID = compClient.getComponentUUID(componentName);
-            listener.getLogger().println("The component already exists on the UCD server with UUID '" + componentUUID + "'");
-        }
-        catch (IOException ex) {
+            listener.getLogger()
+                    .println("The component already exists on the UCD server with UUID '" + componentUUID + "'");
+        } catch (IOException ex) {
             listener.getLogger().println("The component does not exist on the UCD server");
-        }
-        catch (JSONException ex) {
-            throw new AbortException("An error occurred while checking the UCD server for the component : " + ex.getMessage());
+        } catch (JSONException ex) {
+            throw new AbortException(
+                    "An error occurred while checking the UCD server for the component : " + ex.getMessage());
         }
 
         // create new component
         if (componentUUID == null) {
             try {
                 listener.getLogger().println("Creating new component '" + componentName + "'");
-                componentUUID = compClient.createComponent(componentName,
-                                                           description,
-                                                           sourceConfigPlugin,
-                                                           defaultVersionType,
-                                                           templateName,
-                                                           templateVersion,
-                                                           importAutomatically,
-                                                           useVfs,
-                                                           properties);
+                componentUUID = compClient.createComponent(componentName, description, sourceConfigPlugin,
+                        defaultVersionType, templateName, templateVersion, importAutomatically, useVfs, properties);
                 listener.getLogger().println("Successfully created the component with UUID '" + componentUUID + "'");
-            }
-            catch (IOException ex) {
+            } catch (IOException ex) {
                 throw new AbortException("Failed to create the component: " + ex.getMessage());
-            }
-            catch (JSONException ex) {
-                throw new AbortException("An error occurred while processing the JSON object for a new component: " +
-                                         ex.getMessage());
+            } catch (JSONException ex) {
+                throw new AbortException(
+                        "An error occurred while processing the JSON object for a new component: " + ex.getMessage());
             }
         }
 
@@ -186,8 +171,7 @@ public class ComponentHelper {
                     listener.getLogger().println("Setting component property '" + key + "' to '" + value + "'");
                     compClient.setComponentProperty(componentName, key, value, false);
                     listener.getLogger().println("Successfully set property");
-                }
-                catch (IOException ex) {
+                } catch (IOException ex) {
                     throw new AbortException("Failed to set component property: " + ex.getMessage());
                 }
             }
@@ -199,23 +183,23 @@ public class ComponentHelper {
             // check for component
             boolean componentExists = false;
             try {
-                listener.getLogger().println("Checking the UCD server for existing component '" + componentName + "' in " +
-                                             "application '" + application + "'");
+                listener.getLogger().println("Checking the UCD server for existing component '" + componentName
+                        + "' in " + "application '" + application + "'");
                 JSONArray serverComponents = appClient.getApplicationComponents(application);
                 for (int i = 0; i < serverComponents.length(); i++) {
-                  JSONObject serverComponent = serverComponents.getJSONObject(i);
-                  String serverComponentName = serverComponent.getString("name");
-                  if (componentName.equals(serverComponentName)) {
-                      componentExists = true;
-                  }
+                    JSONObject serverComponent = serverComponents.getJSONObject(i);
+                    String serverComponentName = serverComponent.getString("name");
+                    if (componentName.equals(serverComponentName)) {
+                        componentExists = true;
+                    }
                 }
-            }
-            catch (IOException ex) {
-                throw new AbortException("An error occurred while retrieving application components : " + ex.getMessage());
-            }
-            catch (JSONException ex) {
-                throw new AbortException("An error occurred while processing the JSON object for the application components: " +
-                                         ex.getMessage());
+            } catch (IOException ex) {
+                throw new AbortException(
+                        "An error occurred while retrieving application components : " + ex.getMessage());
+            } catch (JSONException ex) {
+                throw new AbortException(
+                        "An error occurred while processing the JSON object for the application components: "
+                                + ex.getMessage());
             }
 
             if (componentExists) {
@@ -225,12 +209,13 @@ public class ComponentHelper {
             // add component
             else {
                 try {
-                    listener.getLogger().println("Adding component '" + componentName + "' to application '" + application + "'");
+                    listener.getLogger()
+                            .println("Adding component '" + componentName + "' to application '" + application + "'");
                     appClient.addComponentToApplication(application, componentName);
                     listener.getLogger().println("Successfully added component");
-                }
-                catch (IOException ex) {
-                    throw new AbortException("An error occurred while adding the component to the application : " + ex.getMessage());
+                } catch (IOException ex) {
+                    throw new AbortException(
+                            "An error occurred while adding the component to the application : " + ex.getMessage());
                 }
             }
         }
@@ -239,8 +224,7 @@ public class ComponentHelper {
     public void addTag(String name, String tag) throws AbortException {
         try {
             compClient.addTagToComponent(name, tag);
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             throw new AbortException("An error occurred while tagging the component : " + ex.getMessage());
         }
     }
