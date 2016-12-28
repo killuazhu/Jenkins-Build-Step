@@ -222,6 +222,7 @@ public class DeployHelper {
                                                               snapshot,
                                                               deployBlock.getDeployOnlyChanged(),
                                                               componentVersions);
+
         }
         catch (IOException ex) {
             throw new AbortException("Could not request application process: " + ex.getMessage());
@@ -241,7 +242,9 @@ public class DeployHelper {
         while (!processFinished) {
             deploymentResult = checkDeploymentProcessResult(appProcUUID.toString());
 
-            if (!deploymentResult.isEmpty() && !deploymentResult.equalsIgnoreCase("NONE")) {
+            if (!deploymentResult.isEmpty()
+                    && !deploymentResult.equalsIgnoreCase("NONE")
+                    && !deploymentResult.equalsIgnoreCase("SCHEDULED FOR FUTURE")) {
                 processFinished = true;
 
                 if (deploymentResult.equalsIgnoreCase("FAULTED") || deploymentResult.equalsIgnoreCase("FAILED TO START")) {

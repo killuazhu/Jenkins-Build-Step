@@ -46,8 +46,9 @@ import com.urbancode.jenkins.plugins.ucdeploy.DeliveryHelper.Push;
 import com.urbancode.jenkins.plugins.ucdeploy.DeployHelper;
 import com.urbancode.jenkins.plugins.ucdeploy.DeployHelper.DeployBlock;
 import com.urbancode.jenkins.plugins.ucdeploy.DeployHelper.CreateSnapshotBlock;
+import com.urbancode.jenkins.plugins.ucdeploy.SystemHelper;
 import com.urbancode.jenkins.plugins.ucdeploy.VersionHelper;
-import com.urbancode.jenkins.plugins.ucdeploy.VersionHelper.VersionBlock;;
+import com.urbancode.jenkins.plugins.ucdeploy.VersionHelper.VersionBlock;
 
 public class UCDeployPublisher extends Builder implements SimpleBuildStep {
 
@@ -434,6 +435,13 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep {
         }
 
         UCDeploySite udSite = getSite();
+        SystemHelper sysHelper = new SystemHelper(udSite.getUri(), udSite.getClient(), listener);
+
+        if (sysHelper.isMaintenanceEnabled()) {
+            throw new AbortException("UrbanCode Deploy is in maintenance mode, "
+                    + "and no processes may be run.");
+        }
+
         EnvVars envVars = build.getEnvironment(listener);
 
         if (componentChecked() ) {
