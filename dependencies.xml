@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://www.urbancode.com/schema/cs/project-dependencies/1.0"
- name="jenkins-ud-plugin" workflow="build workflow [master]">
+ name="jenkins-pipeline-ud-plugin" workflow="build workflow [master]">
   <dependencies conflictStrategy="FAIL">
     <!-- MAIN -->
     <dependency>
