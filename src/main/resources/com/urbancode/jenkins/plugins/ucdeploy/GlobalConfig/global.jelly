@@ -2,7 +2,7 @@
   <j:set var="helpURL" value="/plugin/ibm-ucdeploy-build-steps"/>
 
 
-  <f:section title="IBM UrbanCode Deploy Build Steps Plugin Configuration">
+  <f:section title="IBM UrbanCode Deploy Pipeline Plugin Configuration">
     <f:entry title="UCD Servers">
       <f:repeatable name="sites" var="site" items="${descriptor.sites}">
         <table width="100%">
@@ -18,8 +18,11 @@
           <f:entry title="Password" help="${helpURL}/global/password.html">
             <f:password name="password" value="${site.password}"/>
           </f:entry>
+          <f:entry title="Administrative User" field="adminUser" help="${helpURL}/admin-user.html">
+            <f:checkbox name="adminUser" checked="${site.adminUser}"/>
+          </f:entry>
           <f:entry title="Trust All Certificates" help="${helpURL}/global/trust.html">
-            <f:checkbox name="trustAllCerts" checked="${site.trustAllCerts}" value="${site.trustAllCerts}"/>
+            <f:checkbox name="trustAllCerts" checked="${site.trustAllCerts}"/>
           </f:entry>
           <f:entry title="">
             <div style="text-align: right">

@@ -11,6 +11,8 @@
  */
 package com.urbancode.jenkins.plugins.ucdeploy;
 
+import org.apache.http.impl.client.DefaultHttpClient;
+
 import hudson.AbortException;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -26,11 +28,13 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.Builder;
 import hudson.tasks.BuildStepDescriptor;
+import hudson.util.Secret;
 
 import jenkins.tasks.SimpleBuildStep;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 
 import net.sf.json.JSONObject;
 
@@ -49,12 +53,14 @@ import com.urbancode.jenkins.plugins.ucdeploy.DeployHelper.CreateSnapshotBlock;
 import com.urbancode.jenkins.plugins.ucdeploy.SystemHelper;
 import com.urbancode.jenkins.plugins.ucdeploy.VersionHelper;
 import com.urbancode.jenkins.plugins.ucdeploy.VersionHelper.VersionBlock;
+import com.urbancode.jenkins.plugins.ucdeploy.UCDeployPublisher.UserBlock;
 
 public class UCDeployPublisher extends Builder implements SimpleBuildStep {
 
     public static final GlobalConfig.GlobalConfigDescriptor GLOBALDESCRIPTOR = GlobalConfig.getGlobalConfigDescriptor();
 
     private String siteName;
+    private UserBlock altUser;
     private VersionBlock component;
     private DeployBlock deploy;
 
@@ -70,8 +76,13 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep {
      *            The object holding the Deploy Block structure
      */
     @DataBoundConstructor
-    public UCDeployPublisher(String siteName, VersionBlock component, DeployBlock deploy) {
+    public UCDeployPublisher(
+            String siteName,
+            UserBlock altUser,
+            VersionBlock component,
+            DeployBlock deploy) {
         this.siteName = siteName;
+        this.altUser = altUser;
         this.component = component;
         this.deploy = deploy;
     }
@@ -89,6 +100,44 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep {
             }
         }
         return name;
+    }
+
+    public UserBlock getAltUser() {
+        return altUser;
+    }
+
+    public Boolean altUserChecked() {
+        if (getAltUser() != null) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public String getAltUsername() {
+        String altUsername = "";
+        String value = getAltUser().getAltUsername();
+
+        if (value != null) {
+            altUsername = value;
+        }
+
+        return altUsername;
+    }
+
+    public Secret getAltPassword() {
+        Secret altPassword = Secret.fromString("");
+        Secret value = getAltUser().getAltPassword();
+
+        if (value != null) {
+            altPassword = value;
+        }
+
+        return altPassword;
+    }
+
+    public boolean isAltUserAdmin() {
+        return getAltUser().isAdminUser();
     }
 
     public VersionBlock getComponent() {
@@ -435,11 +484,34 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep {
         }
 
         UCDeploySite udSite = getSite();
-        SystemHelper sysHelper = new SystemHelper(udSite.getUri(), udSite.getClient(), listener);
+        DefaultHttpClient udClient;
+        boolean adminUser = false;
 
-        if (sysHelper.isMaintenanceEnabled()) {
-            throw new AbortException("UrbanCode Deploy is in maintenance mode, "
-                    + "and no processes may be run.");
+        if (altUserChecked()) {
+            if (getAltUsername().equals("")) {
+                throw new AbortException("Alternative username is a required property when specifying the optional"
+                        + "'Run as Alternative User' property.");
+            }
+
+            listener.getLogger().println("Running job as alternative user '" + getAltUsername() + "'.");
+
+            udClient = udSite.getTempClient(getAltUsername(), getAltPassword());
+            adminUser = isAltUserAdmin();
+        }
+        else {
+            udClient = udSite.getClient();
+            adminUser = udSite.isAdminUser();
+        }
+
+        if (adminUser) {
+            SystemHelper sysHelper = new SystemHelper(udSite.getUri(), udClient, listener);
+
+            listener.getLogger().println("Administrative user specified. Checking if server is running in "
+                    + "maintenance mode.");
+            if (sysHelper.isMaintenanceEnabled()) {
+                throw new AbortException("The UrbanCode Deploy server is running in maintenance mode "
+                        + "and no processes may be run.");
+            }
         }
 
         EnvVars envVars = build.getEnvironment(listener);
@@ -450,6 +522,7 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep {
                     buildUrl,
                     build.getDisplayName(),
                     udSite,
+                    udClient,
                     getComponent(),
                     envVars,
                     listener);
@@ -458,8 +531,45 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep {
         }
 
         if (deployChecked()) {
-            DeployHelper deployHelper = new DeployHelper(udSite.getUri(), udSite.getClient(), listener, envVars);
+            DeployHelper deployHelper = new DeployHelper(udSite.getUri(), udClient, listener, envVars);
             deployHelper.deployVersion(getDeploy());
+        }
+    }
+
+    public static class UserBlock implements Serializable {
+        private String altUsername;
+        private Secret altPassword;
+        private boolean adminUser;
+
+        @DataBoundConstructor
+        public UserBlock(String altUsername, Secret altPassword, boolean adminUser) {
+            this.altUsername = altUsername;
+            this.altPassword = altPassword;
+            this.adminUser = adminUser;
+        }
+
+        public String getAltUsername() {
+            return altUsername;
+        }
+
+        public void setAltUsername(String altUsername) {
+            this.altUsername = altUsername;
+        }
+
+        public Secret getAltPassword() {
+            return altPassword;
+        }
+
+        public void setAltPassword(Secret altPassword) {
+            this.altPassword = altPassword;
+        }
+
+        public boolean isAdminUser() {
+            return adminUser;
+        }
+
+        public void setAdminUser(boolean adminUser) {
+            this.adminUser = adminUser;
         }
     }
 
@@ -472,6 +582,7 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep {
         String buildUrl;
         String buildName;
         UCDeploySite udSite;
+        DefaultHttpClient udClient;
         VersionBlock component;
         EnvVars envVars;
         TaskListener listener;
@@ -480,6 +591,7 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep {
                 String buildUrl,
                 String buildName,
                 UCDeploySite udSite,
+                DefaultHttpClient udClient,
                 VersionBlock component,
                 EnvVars envVars,
                 TaskListener listener)
@@ -487,6 +599,7 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep {
             this.buildUrl = buildUrl;
             this.buildName = buildName;
             this.udSite = udSite;
+            this.udClient = udClient;
             this.component = component;
             this.envVars = envVars;
             this.listener = listener;
@@ -503,7 +616,7 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep {
         @Override
         public Boolean invoke(File workspace, VirtualChannel node) throws IOException, InterruptedException {
 
-            VersionHelper versionHelper = new VersionHelper(udSite.getUri(), udSite.getClient(), listener, envVars);
+            VersionHelper versionHelper = new VersionHelper(udSite.getUri(), udClient, listener, envVars);
             versionHelper.createVersion(component, "Jenkins Build " + buildName, buildUrl);
 
             return true;

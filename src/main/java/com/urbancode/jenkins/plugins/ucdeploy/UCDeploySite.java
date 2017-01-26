@@ -40,17 +40,15 @@ public class UCDeploySite implements Serializable {
 
     private static final long serialVersionUID = -8723534991244260459L;
 
-    /** The profile name. */
     private String profileName;
 
-    /** The url. */
     private String url;
 
-    /** The username. */
     private String user;
 
-    /** The password. */
     private Secret password;
+
+    private boolean adminUser;
 
     private boolean trustAllCerts;
 
@@ -64,20 +62,30 @@ public class UCDeploySite implements Serializable {
     }
 
     /**
-     * Necessary constructor to allow jenkins to treat the password as an encrypted value
+     * Necessary constructor to allow jenkins to treate the password as an encrypted value
      *
      * @param profileName
      * @param url the url of the UrbanDeploy instance
      * @param user
      * @param password
+     * @param adminUser
      * @param trustAllCerts
      */
-    public UCDeploySite(String profileName, String url, String user, Secret password, boolean trustAllCerts) {
+    public UCDeploySite(
+            String profileName,
+            String url,
+            String user,
+            Secret password,
+            boolean adminUser,
+            boolean trustAllCerts)
+    {
         this.profileName = profileName;
         this.url = url;
         this.user = user;
         this.password = password;
+        this.adminUser = adminUser;
         this.trustAllCerts = trustAllCerts;
+        client = UDRestClient.createHttpClient(user, password.toString(), trustAllCerts);
     }
 
     /**
@@ -87,11 +95,19 @@ public class UCDeploySite implements Serializable {
      * @param url
      * @param user
      * @param password
+     * @param adminUser
      * @param trustAllCerts
      */
     @DataBoundConstructor
-    public UCDeploySite(String profileName, String url, String user, String password, boolean trustAllCerts) {
-        this(profileName, url, user, Secret.fromString(password), trustAllCerts);
+    public UCDeploySite(
+            String profileName,
+            String url,
+            String user,
+            String password,
+            boolean adminUser,
+            boolean trustAllCerts)
+    {
+        this(profileName, url, user, Secret.fromString(password), adminUser, trustAllCerts);
     }
 
     public DefaultHttpClient getClient() {
@@ -99,6 +115,10 @@ public class UCDeploySite implements Serializable {
             client = UDRestClient.createHttpClient(user, password.toString(), trustAllCerts);
         }
         return client;
+    }
+
+    public DefaultHttpClient getTempClient(String tempUser, Secret tempPassword) {
+        return UDRestClient.createHttpClient(tempUser, tempPassword.toString(), trustAllCerts);
     }
 
     /**
@@ -207,6 +227,24 @@ public class UCDeploySite implements Serializable {
      */
     public void setPassword(Secret password) {
         this.password = password;
+    }
+
+    /**
+     * Gets adminUser
+     *
+     * @return if the user set on this client has administrative credentials
+     */
+    public boolean isAdminUser() {
+        return adminUser;
+    }
+
+    /**
+     * Sets adminUser to set if this user has administrative credentials
+     *
+     * @param adminUser
+     */
+    public void setAdminUser(boolean adminUser) {
+        this.adminUser = adminUser;
     }
 
     /**

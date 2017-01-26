@@ -17,3 +17,7 @@ Fixed PI37957 - Pulled in a fix for excludes options not being handled by a comm
 ### Version 2.1
 
 Fixed PI61971 - Connection pool leak in Jenkins ibm-ucdeploy-build-steps.
+
+### Version 2.2
+Fixed RFE 98375 - Jenkins Plugin only allows Global credentials instead of job-based credentials.
+Fixed PI75045 - UCD server maintenance mode check requires admin privileges.

@@ -11,6 +11,24 @@
           </j:forEach>
         </select>
       </f:entry>
+      <f:optionalBlock name="altUser"
+                       title="Run as Alternative User"
+                       help="${helpURL}/alt-user.html"
+                       checked="${instance.altUserChecked()}">
+        <f:block>
+          <table style="width:100%">
+            <f:entry title="Alternative Username" field="altUsername" help="${helpURL}/alt-username.html">
+              <f:textbox/>
+            </f:entry>
+            <f:entry title="Alternative Password" field="altPassword" help="${helpURL}/alt-password.html">
+              <f:password/>
+            </f:entry>
+            <f:entry title="Administrative User" field="adminUser" help="${helpURL}/admin-user.html">
+              <f:checkbox name="adminUser" checked="${instance.isAltUserAdmin()}"/>
+            </f:entry>
+          </table>
+        </f:block>
+      </f:optionalBlock>
       <f:optionalBlock name="component"
                        title="Create Component Version"
                        help="${helpURL}/create/help.html"
