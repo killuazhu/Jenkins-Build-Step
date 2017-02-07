@@ -484,7 +484,7 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep {
         }
 
         UCDeploySite udSite = getSite();
-        DefaultHttpClient udClient;
+        DefaultHttpClient udClient;  // not serializable
         boolean adminUser = false;
 
         if (altUserChecked()) {
@@ -522,7 +522,7 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep {
                     buildUrl,
                     build.getDisplayName(),
                     udSite,
-                    udClient,
+                    altUser,
                     getComponent(),
                     envVars,
                     listener);
@@ -582,7 +582,7 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep {
         String buildUrl;
         String buildName;
         UCDeploySite udSite;
-        DefaultHttpClient udClient;
+        UserBlock altUser;
         VersionBlock component;
         EnvVars envVars;
         TaskListener listener;
@@ -591,7 +591,7 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep {
                 String buildUrl,
                 String buildName,
                 UCDeploySite udSite,
-                DefaultHttpClient udClient,
+                UserBlock altUser,
                 VersionBlock component,
                 EnvVars envVars,
                 TaskListener listener)
@@ -599,7 +599,7 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep {
             this.buildUrl = buildUrl;
             this.buildName = buildName;
             this.udSite = udSite;
-            this.udClient = udClient;
+            this.altUser = altUser; // used to acquire udClient in a serializable environment
             this.component = component;
             this.envVars = envVars;
             this.listener = listener;
@@ -615,6 +615,14 @@ public class UCDeployPublisher extends Builder implements SimpleBuildStep {
 
         @Override
         public Boolean invoke(File workspace, VirtualChannel node) throws IOException, InterruptedException {
+            DefaultHttpClient udClient;
+
+            if (altUser != null) {
+                udClient = udSite.getTempClient(altUser.getAltUsername(), altUser.getAltPassword());
+            }
+            else {
+                udClient = udSite.getClient();
+            }
 
             VersionHelper versionHelper = new VersionHelper(udSite.getUri(), udClient, listener, envVars);
             versionHelper.createVersion(component, "Jenkins Build " + buildName, buildUrl);
