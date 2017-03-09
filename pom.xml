@@ -7,13 +7,22 @@
     <version>2.0</version> <!-- which version of Jenkins is this plugin built against? -->
   </parent>
 
-  <name>IBM UrbanCode Deploy Build Steps Plugin</name>
+  <name>IBM UrbanCode Deploy Pipeline (Build Steps) Plugin</name>
   <groupId>com.urbancode.jenkins.plugins</groupId>
   <artifactId>ibm-ucdeploy-build-steps</artifactId>
-  <version>2.2.${env.buildLife}</version>
+  <version>2.2</version>
   <packaging>hpi</packaging>
   <url>https://developer.ibm.com/urbancode/plugin/jenkins/</url>
 
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>
+  
   <build>
     <plugins>
       <plugin>
