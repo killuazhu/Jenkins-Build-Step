@@ -1,4 +1,4 @@
-<project name="jenkins-pipeline-ud-plugin" default="dist" xmlns:codestation="antlib:com.urbancode.codestation2.client">
+<project name="jenkins-pipeline-ud-plugin" default="dist" xmlns:codestation="antlib:com.urbancode.codestation2.client" xmlns:ivy="antlib:org.apache.ivy.ant">
 
     <defaultexcludes add="**/.ahs.dig" />
     <defaultexcludes add="**/.ahs.manifest" />
@@ -17,7 +17,12 @@
     <property name="ahp.branch.name" value="master"/>
     <property name="ahp.project.name" value="${project}"/>
     <property name="ahp.workflow.name" value="build workflow [${ahp.branch.name}]"/>
+	
     <condition property="plugin.version" value="${env.AH_BUILD_LIFE_ID}" else="dev">
+        <isset property="env.AH_BUILD_LIFE_ID" />
+    </condition>
+	
+    <condition property="buildlife.exists" value="true">
         <isset property="env.AH_BUILD_LIFE_ID" />
     </condition>
     
@@ -87,15 +92,55 @@
     <!-- ==================================================================
          ARTIFACT HANDLING
          ================================================================== -->
-    <target name="resolve" unless="resolve.no"
-            description="Resolve all dependencies">
+    <target name="resolve" 
+    	unless="resolve.no"
+    	description="Resolve all dependencies" 
+    	depends="resolve-ivy, resolve-codestation">
+    </target>
+	
+	<target name="resolve-codestation" if="buildlife.exists"
+            description="Resolve all codestation dependencies">
             <mkdir dir="${lib.dir}"/>
         <codestation:resolve
             buildLife="${build.life.id}"
             xmlFile="dependencies.xml" />
     </target>
+	
+    <target name="resolve-ivy" depends="install-ivy" unless="buildlife.exists" description="Resolve all ivy dependencies">
+        <mkdir dir="${lib.dir}"/>
+        <mkdir dir="${lib.build.dir}"/>
+        <mkdir dir="${lib.test.dir}"/>
+        <ivy:retrieve conf="default" pattern="${lib.dir}/[artifact]-[revision](-[classifier]).[ext]"/>
+        <ivy:retrieve conf="build" pattern="${lib.dir}/[conf]/[artifact]-[revision](-[classifier]).[ext]"/>
+        <ivy:retrieve conf="test" pattern="${lib.dir}/[conf]/[artifact]-[revision](-[classifier]).[ext]"/>
+    </target>
 
-    <target name="publish" depends="dist" unless="publish.no"
+    <!-- =================================================== -->
+    <!-- INSTALL IVY TARGET                                  -->
+    <!-- =================================================== -->
+    <available classname="org.apache.ivy.Main" property="ivy.installed"/>
+    <target name="install-ivy" depends="-install, -fail"></target>
+
+    <target name="-install" description="Install ivy" unless="ivy.installed">
+        <!-- Installation -->
+        <property name="antHome" value="${user.home}${file.separator}.ant"/>
+        <mkdir dir="${antHome}${file.separator}lib"/>
+        <get dest="${antHome}${file.separator}lib${file.separator}ivy.jar" src="http://search.maven.org/remotecontent?filepath=org/apache/ivy/ivy/2.3.0/ivy-2.3.0.jar"/>
+        <echo message="SUCCESS! Ivy has been installed in ${antHome}." />
+
+        <!-- Determine whether to continue or fail -->
+        <property name="failIvy" value="true"/>
+        <condition property="do.fail">
+            <equals arg1="${failIvy}" arg2="true" />
+        </condition>
+    </target>
+
+    <!-- Default to fail if Ivy installed, unless -DfailIvy=false : Used for .travis -->
+    <target name="-fail" if="do.fail">
+        <fail message="Please run the build again.${line.separator}Note: If you get this message more than once, trying specify your Ant's home directory with the flag: ant -DantHome='ant/home/directory/here' or set/export the `ANT_HOME` environment variable." />
+    </target>
+
+    <target name="publish" if="buildlife.exists" depends="dist" unless="publish.no"
             description="Publish artifacts to local codestation repository">
         <codestation:publish
             project="${ahp.project.name}"
