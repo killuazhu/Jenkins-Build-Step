@@ -1,0 +1,250 @@
+<project name="jenkins-pipeline-ud-plugin" default="dist" xmlns:codestation="antlib:com.urbancode.codestation2.client">
+
+    <defaultexcludes add="**/.ahs.dig" />
+    <defaultexcludes add="**/.ahs.manifest" />
+    <defaultexcludes add="**/*.bom" />
+    <defaultexcludes add="**/.git*" />
+    <defaultexcludes add="**/.mailmap" />
+
+    <property environment="env"/>
+
+    <!-- ==================================================================
+         PROJECT CONFIGURATION
+         ================================================================== -->
+    <property name="project" value="${ant.project.name}"/>
+    <property name="build.life.id" value="${env.AH_BUILD_LIFE_ID}"/>
+
+    <property name="ahp.branch.name" value="master"/>
+    <property name="ahp.project.name" value="${project}"/>
+    <property name="ahp.workflow.name" value="build workflow [${ahp.branch.name}]"/>
+    <condition property="plugin.version" value="${env.AH_BUILD_LIFE_ID}" else="dev">
+        <isset property="env.AH_BUILD_LIFE_ID" />
+    </condition>
+    
+    <property name="MAVEN_HOME" value="${env.MAVEN_HOME}"/>
+
+    <!-- ==================================================================
+         ENVIRONMENTAL DETECTION
+         ================================================================== -->
+    <condition property="git" value="git.cmd">
+        <os family="windows" />
+    </condition>
+    <condition property="git" value="git">
+        <not>
+            <os family="windows" />
+        </not>
+    </condition>
+
+    <condition property="mvn" value="${MAVEN_HOME}/bin/mvn.bat">
+        <os family="windows" />
+    </condition>
+    <condition property="mvn" value="${MAVEN_HOME}/bin/mvn">
+        <not>
+            <os family="windows" />
+        </not>
+    </condition>
+
+    <!-- ==================================================================
+         LOCATIONS OF PROJECT ELEMENTS
+         ================================================================== -->
+    <property name="build.dir" location="work" />
+
+    <property name="src.dir" location="src" />
+    <property name="src.main.java.dir" location="${src.dir}/main/java" />
+
+    <property name="lib.dir" location="lib" />
+
+    <!-- ==================================================================
+         LOCATIONS OF BUILD ARTIFACTS
+         ================================================================== -->
+    <property name="dist.dir" location="dist" />
+    <property name="target.dir" location="target" />
+
+    <!-- ==================================================================
+         TASK DEFAULTS
+         ================================================================== -->
+    <presetdef name="exec">
+      <exec failifexecutionfails="true"
+            failonerror="true"
+            logError="true"/>
+    </presetdef>
+
+    <!-- ==================================================================
+         PATHS
+         ================================================================== -->
+    <path id="classpath.main">
+        <fileset dir="${lib.dir}">
+            <include name="*.jar" />
+        </fileset>
+    </path>
+
+    <!-- ===================================================================
+         STANDARD TARGETS
+         =================================================================== -->
+    <target name="jar" depends="jar-main"/>
+    <target name="dist" depends="dist-main"/>
+
+    <!-- ==================================================================
+         ARTIFACT HANDLING
+         ================================================================== -->
+    <target name="resolve" unless="resolve.no"
+            description="Resolve all dependencies">
+            <mkdir dir="${lib.dir}"/>
+        <codestation:resolve
+            buildLife="${build.life.id}"
+            xmlFile="dependencies.xml" />
+    </target>
+
+    <target name="publish" depends="dist" unless="publish.no"
+            description="Publish artifacts to local codestation repository">
+        <codestation:publish
+            project="${ahp.project.name}"
+            workflow="${ahp.workflow.name}"
+            publishall="true"/>
+    </target>
+
+    <!-- ==================================================================
+         COMPILE
+         ================================================================== -->
+    <target name="prepare" depends="resolve">
+        <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/uDeployRestClient.jar"/>
+          <arg value="-DgroupId=uc-uDeployRestClient"/>
+          <arg value="-DartifactId=uc-uDeployRestClient"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/codestation-aggregate.jar"/>
+          <arg value="-DgroupId=uc-codestation-aggregate"/>
+          <arg value="-DartifactId=uc-codestation-aggregate"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/replicated-codestation.jar"/>
+          <arg value="-DgroupId=uc-replicated-codestation"/>
+          <arg value="-DartifactId=uc-replicated-codestation"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/CommonsUtil.jar"/>
+          <arg value="-DgroupId=uc-commons-util"/>
+          <arg value="-DartifactId=uc-commons-util"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/CommonsFileUtils.jar"/>
+          <arg value="-DgroupId=uc-commons-fileutils"/>
+          <arg value="-DartifactId=uc-commons-fileutils"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/HttpComponents-Util.jar"/>
+          <arg value="-DgroupId=uc-httpcomponents-util"/>
+          <arg value="-DartifactId=uc-httpcomponents-util"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/jersey-core-1.12.jar"/>
+          <arg value="-DgroupId=uc-jersey-core"/>
+          <arg value="-DartifactId=uc-jersey-core"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/jersey-client-1.12.jar"/>
+          <arg value="-DgroupId=uc-jersey-client"/>
+          <arg value="-DartifactId=uc-jersey-client"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/jsr311-api-1.1.1.jar"/>
+          <arg value="-DgroupId=uc-jsr311-api"/>
+          <arg value="-DartifactId=uc-jsr311-api"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/jettison-1.1.jar"/>
+          <arg value="-DgroupId=uc-jettison"/>
+          <arg value="-DartifactId=uc-jettison"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+    </target>
+
+    <!-- ==================================================================
+         JAR
+         ================================================================== -->
+    <target name="jar-main" depends="prepare, set-version-property">
+        <exec executable="${mvn}">
+          <arg value="package"/>
+          <arg value="-Denv.buildLife=${plugin.version}"/>
+        </exec>
+    </target>
+
+
+    <!-- ==================================================================
+         DIST
+         ================================================================== -->
+    <target name="dist-main" depends="jar-main"/>
+
+    <!-- ==================================================================
+         OTHER
+         ================================================================== -->
+    <target name="clean">
+        <delete dir="${dist.dir}" />
+        <delete dir="${target.dir}" />
+        <delete dir="${build.dir}" />
+    </target>
+
+    <target name="clean-all" depends="clean">
+        <delete dir="${lib.dir}" />
+    </target>
+
+    <target name="set-version-property" unless="version">
+        <exec executable="${git}" outputproperty="version">
+            <arg value="rev-parse"/>
+            <arg value="--verify"/>
+            <arg value="--short=12"/>
+            <arg value="HEAD"/>
+        </exec>
+    </target>
+</project>
+
