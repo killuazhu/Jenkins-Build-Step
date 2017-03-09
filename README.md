@@ -81,6 +81,7 @@ node {
 ## Release Notes
 ### Version 2.2
 Fixed RFE 98375 - Jenkins Plugin only allows Global credentials instead of job-based credentials.
+
 Fixed PI75045 - UCD server maintenance mode check requires admin privileges.
 
 ### Version 2.1
@@ -88,5 +89,7 @@ Fixed PI61971 - Connection pool leak in Jenkins ibm-ucdeploy-build-steps.
 
 ### Older Versions
 Fixed PI32899 - Jenkins plugin fails on slave nodes with an UnserializbleException
+
 Fixed PI36005 - Jenkins plugin 1.2.1 not compatible with builds created with earlier versions of the plugin
+
 Fixed PI37957 - Pulled in a fix for excludes options not being handled by a common library.
