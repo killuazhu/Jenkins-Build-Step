@@ -1,0 +1,17 @@
+<ivysettings>
+	<properties file="${ivy.settings.dir}/ivysettings.properties"/>
+	<settings defaultResolver="local-chain" />
+	<caches defaultCacheDir="${ivy.settings.dir}/ivy-cache" />
+	<resolvers>
+        <ibiblio name="urbancode" root="https://public.dhe.ibm.com/software/products/UrbanCode/maven2/" m2compatible="true" usepoms="false" />
+		<ibiblio name="libraries" m2compatible="true" usepoms="false" />
+		<url name="urbancode">
+			<artifact pattern="https://public.dhe.ibm.com/software/products/UrbanCode/maven2/com/ibm/urbancode/commons/[artifact]/[revision]/[artifact]-[revision].[ext]" />
+			<ivy pattern="https://public.dhe.ibm.com/software/products/UrbanCode/com/ibm/urbancode/commons/maven2/[module]-[revision].xml" />
+		</url>
+        <chain name="local-chain">
+            <resolver ref="urbancode"/>
+            <resolver ref="libraries"/>
+        </chain>
+    </resolvers>
+</ivysettings>

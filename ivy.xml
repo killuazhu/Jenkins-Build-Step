@@ -1,0 +1,51 @@
+<ivy-module version="2.0">
+<!--
+    © Copyright IBM Corporation 2014, 2017.
+    This is licensed under the following license.
+    The Eclipse Public 1.0 License (http://www.eclipse.org/legal/epl-v10.html)
+    U.S. Government Users Restricted Rights:  Use, duplication or disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+-->
+    <info organisation="com.ibm.urbancode" module="libraries"/>
+    <configurations>
+        <conf name="default" description="Jars used during runtime"/>
+        <conf name="build" description="Jars used during build"/>
+        <conf name="test" description="Jars used during testing"/>
+    </configurations>
+    <dependencies>
+        <!-- Runtime Dependencies -->
+        <!-- https://search.maven.org/#artifactdetails%7Ccommons-logging%7Ccommons-logging%7C1.1%7Cjar -->
+        <!-- <dependency org="commons-logging" name="commons-logging" rev="1.1" transitive="false" conf="default->default"/> -->
+        <!-- https://search.maven.org/#artifactdetails%7Ccommons-codec%7Ccommons-codec%7C1.5%7Cjar -->
+        <!-- <dependency org="commons-codec" name="commons-codec" rev="1.5" transitive="false" conf="default->default"/> -->
+        <!-- https://search.maven.org/#artifactdetails%7Corg.apache.commons%7Ccommons-compress%7C1.1%7Cjar -->
+        <!-- <dependency org="org.apache.commons" name="commons-compress" rev="1.1" transitive="false" conf="default->default"/> -->
+        <!-- https://search.maven.org/#artifactdetails%7Corg.apache.httpcomponents%7Chttpcomponents-client%7C4.3.4%7Cpom -->
+        <!-- https://hc.apache.org/httpcomponents-client-ga/httpclient/dependency-info.html -->
+        <!-- <dependency org="org.apache.httpcomponents" name="httpclient" rev="4.3.4" transitive="true" conf="default->default">
+          <artifact name="httpclient" type="jar" />
+        </dependency> -->
+        <!-- https://mvnrepository.com/artifact/log4j/log4j -->
+        <!-- <dependency org="log4j" name="log4j" rev="1.2.16" conf="default->default"/> -->
+        <!-- https://mvnrepository.com/artifact/com.sun.jersey/jersey-core -->
+        <dependency org="com.sun.jersey" name="jersey-core" rev="1.12" transitive="true" conf="default->default"/>
+        <!-- https://mvnrepository.com/artifact/com.sun.jersey/jersey-client -->
+        <dependency org="com.sun.jersey" name="jersey-client" rev="1.12" transitive="true" conf="default->default"/>
+        <!-- https://mvnrepository.com/artifact/javax.ws.rs/jsr311-api -->
+        <dependency org="javax.ws.rs" name="jsr311-api" rev="1.1.1"/>
+        <!-- https://mvnrepository.com/artifact/org.codehaus.jettison/jettison -->
+        <dependency org="org.codehaus.jettison" name="jettison" rev="1.1"/>
+
+        <dependency org="com.ibm.urbancode.commons" name="uDeployRestClient" rev="1.0.0.890605" transitive="true" conf="default->default"/>
+        <dependency org="com.ibm.urbancode.commons" name="httpcomponents-util" rev="1.0.0.890459" transitive="true" conf="default->default"/>
+        <dependency org="com.ibm.urbancode.commons" name="commons-file-utils" rev="0.0.856" transitive="true" conf="default->default"/>
+        <dependency org="com.ibm.urbancode.commons" name="commons-util" rev="0.1.63" transitive="true" conf="default->default"/>
+
+        <!-- Build Dependencies -->
+
+        <!-- Test Dependencies -->
+        <!-- http://search.maven.org/#artifactdetails%7Cjunit%7Cjunit%7C4.11%7Cjar -->
+        <dependency org="junit" name="junit" rev="4.11" transitive="false"  conf="test->default"/>
+        <!-- http://search.maven.org/#artifactdetails%7Corg.hamcrest%7Chamcrest-core%7C1.3%7Cjar -->
+        <dependency org="org.hamcrest" name="hamcrest-core" rev="1.3" transitive="false" conf="test->default"/>
+    </dependencies>
+</ivy-module>

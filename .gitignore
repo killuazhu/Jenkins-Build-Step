@@ -16,6 +16,7 @@
 /ecbin
 /target
 /bin
+/ivy-cache
 
 *.iml
 *.ipr

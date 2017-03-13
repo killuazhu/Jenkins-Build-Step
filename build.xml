@@ -17,30 +17,32 @@
     <property name="ahp.branch.name" value="master"/>
     <property name="ahp.project.name" value="${project}"/>
     <property name="ahp.workflow.name" value="build workflow [${ahp.branch.name}]"/>
-	
+
     <condition property="plugin.version" value="${env.AH_BUILD_LIFE_ID}" else="dev">
         <isset property="env.AH_BUILD_LIFE_ID" />
     </condition>
-	
+
     <condition property="buildlife.exists" value="true">
         <isset property="env.AH_BUILD_LIFE_ID" />
     </condition>
-    
+
     <property name="MAVEN_HOME" value="${env.MAVEN_HOME}"/>
+    <ivy:settings file="ivysettings.xml"/>
 
     <!-- ==================================================================
          ENVIRONMENTAL DETECTION
          ================================================================== -->
-    <condition property="git" value="git.cmd">
+    <!-- <condition property="git" value="git.cmd">
         <os family="windows" />
     </condition>
     <condition property="git" value="git">
         <not>
             <os family="windows" />
         </not>
-    </condition>
+    </condition> -->
+     <property name="git" value="git"/>
 
-    <condition property="mvn" value="${MAVEN_HOME}/bin/mvn.bat">
+    <condition property="mvn" value="${MAVEN_HOME}/bin/mvn.cmd">
         <os family="windows" />
     </condition>
     <condition property="mvn" value="${MAVEN_HOME}/bin/mvn">
@@ -58,6 +60,8 @@
     <property name="src.main.java.dir" location="${src.dir}/main/java" />
 
     <property name="lib.dir" location="lib" />
+    <property name="lib.build.dir" location="${lib.dir}/build" />
+    <property name="lib.test.dir" location="${lib.dir}/test" />
 
     <!-- ==================================================================
          LOCATIONS OF BUILD ARTIFACTS
@@ -92,12 +96,12 @@
     <!-- ==================================================================
          ARTIFACT HANDLING
          ================================================================== -->
-    <target name="resolve" 
+    <target name="resolve"
     	unless="resolve.no"
-    	description="Resolve all dependencies" 
+    	description="Resolve all dependencies"
     	depends="resolve-ivy, resolve-codestation">
     </target>
-	
+
 	<target name="resolve-codestation" if="buildlife.exists"
             description="Resolve all codestation dependencies">
             <mkdir dir="${lib.dir}"/>
@@ -105,7 +109,7 @@
             buildLife="${build.life.id}"
             xmlFile="dependencies.xml" />
     </target>
-	
+
     <target name="resolve-ivy" depends="install-ivy" unless="buildlife.exists" description="Resolve all ivy dependencies">
         <mkdir dir="${lib.dir}"/>
         <mkdir dir="${lib.build.dir}"/>
@@ -155,7 +159,7 @@
         <exec executable="${mvn}">
           <arg value="--batch-mode"/>
           <arg value="install:install-file"/>
-          <arg value="-Dfile=lib/uDeployRestClient.jar"/>
+          <arg value="-Dfile=lib/uDeployRestClient-1.0.0.890605.jar"/>
           <arg value="-DgroupId=uc-uDeployRestClient"/>
           <arg value="-DartifactId=uc-uDeployRestClient"/>
           <arg value="-Dversion=1.0-SNAPSHOT"/>
@@ -165,27 +169,7 @@
         <exec executable="${mvn}">
           <arg value="--batch-mode"/>
           <arg value="install:install-file"/>
-          <arg value="-Dfile=lib/codestation-aggregate.jar"/>
-          <arg value="-DgroupId=uc-codestation-aggregate"/>
-          <arg value="-DartifactId=uc-codestation-aggregate"/>
-          <arg value="-Dversion=1.0-SNAPSHOT"/>
-          <arg value="-Dpackaging=jar"/>
-          <arg value="-DgeneratePom=true"/>
-        </exec>
-        <exec executable="${mvn}">
-          <arg value="--batch-mode"/>
-          <arg value="install:install-file"/>
-          <arg value="-Dfile=lib/replicated-codestation.jar"/>
-          <arg value="-DgroupId=uc-replicated-codestation"/>
-          <arg value="-DartifactId=uc-replicated-codestation"/>
-          <arg value="-Dversion=1.0-SNAPSHOT"/>
-          <arg value="-Dpackaging=jar"/>
-          <arg value="-DgeneratePom=true"/>
-        </exec>
-        <exec executable="${mvn}">
-          <arg value="--batch-mode"/>
-          <arg value="install:install-file"/>
-          <arg value="-Dfile=lib/CommonsUtil.jar"/>
+          <arg value="-Dfile=lib/commons-util-0.1.63.jar"/>
           <arg value="-DgroupId=uc-commons-util"/>
           <arg value="-DartifactId=uc-commons-util"/>
           <arg value="-Dversion=1.0-SNAPSHOT"/>
@@ -195,7 +179,7 @@
         <exec executable="${mvn}">
           <arg value="--batch-mode"/>
           <arg value="install:install-file"/>
-          <arg value="-Dfile=lib/CommonsFileUtils.jar"/>
+          <arg value="-Dfile=lib/commons-file-utils-0.0.856.jar"/>
           <arg value="-DgroupId=uc-commons-fileutils"/>
           <arg value="-DartifactId=uc-commons-fileutils"/>
           <arg value="-Dversion=1.0-SNAPSHOT"/>
@@ -205,7 +189,7 @@
         <exec executable="${mvn}">
           <arg value="--batch-mode"/>
           <arg value="install:install-file"/>
-          <arg value="-Dfile=lib/HttpComponents-Util.jar"/>
+          <arg value="-Dfile=lib/httpcomponents-util-1.0.0.890459.jar"/>
           <arg value="-DgroupId=uc-httpcomponents-util"/>
           <arg value="-DartifactId=uc-httpcomponents-util"/>
           <arg value="-Dversion=1.0-SNAPSHOT"/>
@@ -292,4 +276,3 @@
         </exec>
     </target>
 </project>
-

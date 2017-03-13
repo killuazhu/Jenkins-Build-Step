@@ -22,7 +22,7 @@
       <comments>A business-friendly OSS license</comments>
     </license>
   </licenses>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -60,16 +60,6 @@
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>uc-codestation-aggregate</groupId>
-      <artifactId>uc-codestation-aggregate</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>uc-replicated-codestation</groupId>
-      <artifactId>uc-replicated-codestation</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>uc-commons-util</groupId>
       <artifactId>uc-commons-util</artifactId>
       <version>1.0-SNAPSHOT</version>
@@ -92,11 +82,6 @@
     <dependency>
       <groupId>uc-jersey-client</groupId>
       <artifactId>uc-jersey-client</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>uc-jersey-core</groupId>
-      <artifactId>uc-jersey-core</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
