@@ -13,7 +13,6 @@
          ================================================================== -->
     <property name="project" value="${ant.project.name}"/>
     <property name="build.life.id" value="${env.AH_BUILD_LIFE_ID}"/>
-
     <property name="ahp.branch.name" value="master"/>
     <property name="ahp.project.name" value="${project}"/>
     <property name="ahp.workflow.name" value="build workflow [${ahp.branch.name}]"/>
@@ -23,11 +22,10 @@
     </condition>
 
     <condition property="buildlife.exists" value="true">
-        <isset property="env.AH_BUILD_LIFE_ID" />
+        <isset property="build.life.id" />
     </condition>
 
     <property name="MAVEN_HOME" value="${env.MAVEN_HOME}"/>
-    <ivy:settings file="ivysettings.xml"/>
 
     <!-- ==================================================================
          ENVIRONMENTAL DETECTION
@@ -111,6 +109,7 @@
     </target>
 
     <target name="resolve-ivy" depends="install-ivy" unless="buildlife.exists" description="Resolve all ivy dependencies">
+        <ivy:settings file="ivysettings.xml"/>
         <mkdir dir="${lib.dir}"/>
         <mkdir dir="${lib.build.dir}"/>
         <mkdir dir="${lib.test.dir}"/>
