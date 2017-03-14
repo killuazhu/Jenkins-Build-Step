@@ -12,16 +12,14 @@
          PROJECT CONFIGURATION
          ================================================================== -->
     <property name="project" value="${ant.project.name}"/>
-    <property name="build.life.id" value="${env.AH_BUILD_LIFE_ID}"/>
     <property name="ahp.branch.name" value="master"/>
     <property name="ahp.project.name" value="${project}"/>
     <property name="ahp.workflow.name" value="build workflow [${ahp.branch.name}]"/>
 
-    <condition property="plugin.version" value="${env.AH_BUILD_LIFE_ID}" else="dev">
+    <condition property="build.life.id" value="${env.AH_BUILD_LIFE_ID}">
         <isset property="env.AH_BUILD_LIFE_ID" />
     </condition>
-
-    <condition property="buildlife.exists" value="true">
+    <condition property="plugin.version" value="${build.life.id}" else="dev">
         <isset property="build.life.id" />
     </condition>
 
@@ -100,7 +98,7 @@
     	depends="resolve-ivy, resolve-codestation">
     </target>
 
-	<target name="resolve-codestation" if="buildlife.exists"
+	<target name="resolve-codestation" if="build.life.id"
             description="Resolve all codestation dependencies">
             <mkdir dir="${lib.dir}"/>
         <codestation:resolve
@@ -108,7 +106,7 @@
             xmlFile="dependencies.xml" />
     </target>
 
-    <target name="resolve-ivy" depends="install-ivy" unless="buildlife.exists" description="Resolve all ivy dependencies">
+    <target name="resolve-ivy" depends="install-ivy" unless="build.life.id" description="Resolve all ivy dependencies">
         <ivy:settings file="ivysettings.xml"/>
         <mkdir dir="${lib.dir}"/>
         <mkdir dir="${lib.build.dir}"/>
@@ -116,6 +114,7 @@
         <ivy:retrieve conf="default" pattern="${lib.dir}/[artifact]-[revision](-[classifier]).[ext]"/>
         <ivy:retrieve conf="build" pattern="${lib.dir}/[conf]/[artifact]-[revision](-[classifier]).[ext]"/>
         <ivy:retrieve conf="test" pattern="${lib.dir}/[conf]/[artifact]-[revision](-[classifier]).[ext]"/>
+        <ivy:retrieve conf="urbancode" pattern="${lib.dir}/[artifact].[ext]"/>
     </target>
 
     <!-- =================================================== -->
@@ -158,7 +157,7 @@
         <exec executable="${mvn}">
           <arg value="--batch-mode"/>
           <arg value="install:install-file"/>
-          <arg value="-Dfile=lib/uDeployRestClient-1.0.0.890605.jar"/>
+          <arg value="-Dfile=lib/uDeployRestClient.jar"/>
           <arg value="-DgroupId=uc-uDeployRestClient"/>
           <arg value="-DartifactId=uc-uDeployRestClient"/>
           <arg value="-Dversion=1.0-SNAPSHOT"/>
@@ -168,7 +167,7 @@
         <exec executable="${mvn}">
           <arg value="--batch-mode"/>
           <arg value="install:install-file"/>
-          <arg value="-Dfile=lib/commons-util-0.1.63.jar"/>
+          <arg value="-Dfile=lib/CommonsUtil.jar"/>
           <arg value="-DgroupId=uc-commons-util"/>
           <arg value="-DartifactId=uc-commons-util"/>
           <arg value="-Dversion=1.0-SNAPSHOT"/>
@@ -178,7 +177,7 @@
         <exec executable="${mvn}">
           <arg value="--batch-mode"/>
           <arg value="install:install-file"/>
-          <arg value="-Dfile=lib/commons-file-utils-0.0.856.jar"/>
+          <arg value="-Dfile=lib/CommonsFileUtils.jar"/>
           <arg value="-DgroupId=uc-commons-fileutils"/>
           <arg value="-DartifactId=uc-commons-fileutils"/>
           <arg value="-Dversion=1.0-SNAPSHOT"/>
@@ -188,7 +187,7 @@
         <exec executable="${mvn}">
           <arg value="--batch-mode"/>
           <arg value="install:install-file"/>
-          <arg value="-Dfile=lib/httpcomponents-util-1.0.0.890459.jar"/>
+          <arg value="-Dfile=lib/HttpComponents-Util.jar"/>
           <arg value="-DgroupId=uc-httpcomponents-util"/>
           <arg value="-DartifactId=uc-httpcomponents-util"/>
           <arg value="-Dversion=1.0-SNAPSHOT"/>

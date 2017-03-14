@@ -10,6 +10,7 @@
         <conf name="default" description="Jars used during runtime"/>
         <conf name="build" description="Jars used during build"/>
         <conf name="test" description="Jars used during testing"/>
+        <conf name="urbancode" description="UrbanCode jars used during runtime"/>
     </configurations>
     <dependencies>
         <!-- Runtime Dependencies -->
@@ -31,14 +32,14 @@
         <!-- https://mvnrepository.com/artifact/com.sun.jersey/jersey-client -->
         <dependency org="com.sun.jersey" name="jersey-client" rev="1.12" transitive="true" conf="default->default"/>
         <!-- https://mvnrepository.com/artifact/javax.ws.rs/jsr311-api -->
-        <dependency org="javax.ws.rs" name="jsr311-api" rev="1.1.1"/>
+        <dependency org="javax.ws.rs" name="jsr311-api" rev="1.1.1" conf="default->default"/>
         <!-- https://mvnrepository.com/artifact/org.codehaus.jettison/jettison -->
-        <dependency org="org.codehaus.jettison" name="jettison" rev="1.1"/>
+        <dependency org="org.codehaus.jettison" name="jettison" rev="1.1" conf="default->default"/>
 
-        <dependency org="com.ibm.urbancode.commons" name="uDeployRestClient" rev="1.0.0.890605" transitive="true" conf="default->default"/>
-        <dependency org="com.ibm.urbancode.commons" name="httpcomponents-util" rev="1.0.0.890459" transitive="true" conf="default->default"/>
-        <dependency org="com.ibm.urbancode.commons" name="commons-file-utils" rev="0.0.856" transitive="true" conf="default->default"/>
-        <dependency org="com.ibm.urbancode.commons" name="commons-util" rev="0.1.63" transitive="true" conf="default->default"/>
+        <dependency org="com.ibm.urbancode.commons" name="uDeployRestClient" rev="latest.integration" conf="urbancode->default"/>
+        <dependency org="com.ibm.urbancode.commons" name="HttpComponents-Util" rev="latest.integration" conf="urbancode->default"/>
+        <dependency org="com.ibm.urbancode.commons" name="CommonsFileUtils" rev="latest.integration" conf="urbancode->default"/>
+        <dependency org="com.ibm.urbancode.commons" name="CommonsUtil" rev="latest.integration" conf="urbancode->default"/>
 
         <!-- Build Dependencies -->
 
