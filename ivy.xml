@@ -8,25 +8,12 @@
     <info organisation="com.ibm.urbancode" module="libraries"/>
     <configurations>
         <conf name="default" description="Jars used during runtime"/>
+        <conf name="urbancode" description="UrbanCode jars used during runtime"/>
         <conf name="build" description="Jars used during build"/>
         <conf name="test" description="Jars used during testing"/>
-        <conf name="urbancode" description="UrbanCode jars used during runtime"/>
     </configurations>
     <dependencies>
         <!-- Runtime Dependencies -->
-        <!-- https://search.maven.org/#artifactdetails%7Ccommons-logging%7Ccommons-logging%7C1.1%7Cjar -->
-        <!-- <dependency org="commons-logging" name="commons-logging" rev="1.1" transitive="false" conf="default->default"/> -->
-        <!-- https://search.maven.org/#artifactdetails%7Ccommons-codec%7Ccommons-codec%7C1.5%7Cjar -->
-        <!-- <dependency org="commons-codec" name="commons-codec" rev="1.5" transitive="false" conf="default->default"/> -->
-        <!-- https://search.maven.org/#artifactdetails%7Corg.apache.commons%7Ccommons-compress%7C1.1%7Cjar -->
-        <!-- <dependency org="org.apache.commons" name="commons-compress" rev="1.1" transitive="false" conf="default->default"/> -->
-        <!-- https://search.maven.org/#artifactdetails%7Corg.apache.httpcomponents%7Chttpcomponents-client%7C4.3.4%7Cpom -->
-        <!-- https://hc.apache.org/httpcomponents-client-ga/httpclient/dependency-info.html -->
-        <!-- <dependency org="org.apache.httpcomponents" name="httpclient" rev="4.3.4" transitive="true" conf="default->default">
-          <artifact name="httpclient" type="jar" />
-        </dependency> -->
-        <!-- https://mvnrepository.com/artifact/log4j/log4j -->
-        <!-- <dependency org="log4j" name="log4j" rev="1.2.16" conf="default->default"/> -->
         <!-- https://mvnrepository.com/artifact/com.sun.jersey/jersey-core -->
         <dependency org="com.sun.jersey" name="jersey-core" rev="1.12" transitive="true" conf="default->default"/>
         <!-- https://mvnrepository.com/artifact/com.sun.jersey/jersey-client -->
@@ -36,6 +23,8 @@
         <!-- https://mvnrepository.com/artifact/org.codehaus.jettison/jettison -->
         <dependency org="org.codehaus.jettison" name="jettison" rev="1.1" conf="default->default"/>
 
+        <!-- IBM UrbanCode Runtime Dependencies -->
+        <!--https://public.dhe.ibm.com/software/products/UrbanCode/maven2/com/ibm/urbancode/commons/ -->
         <dependency org="com.ibm.urbancode.commons" name="uDeployRestClient" rev="latest.integration" conf="urbancode->default"/>
         <dependency org="com.ibm.urbancode.commons" name="HttpComponents-Util" rev="latest.integration" conf="urbancode->default"/>
         <dependency org="com.ibm.urbancode.commons" name="CommonsFileUtils" rev="latest.integration" conf="urbancode->default"/>

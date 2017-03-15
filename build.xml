@@ -112,9 +112,9 @@
         <mkdir dir="${lib.build.dir}"/>
         <mkdir dir="${lib.test.dir}"/>
         <ivy:retrieve conf="default" pattern="${lib.dir}/[artifact]-[revision](-[classifier]).[ext]"/>
+        <ivy:retrieve conf="urbancode" pattern="${lib.dir}/[artifact].[ext]"/>
         <ivy:retrieve conf="build" pattern="${lib.dir}/[conf]/[artifact]-[revision](-[classifier]).[ext]"/>
         <ivy:retrieve conf="test" pattern="${lib.dir}/[conf]/[artifact]-[revision](-[classifier]).[ext]"/>
-        <ivy:retrieve conf="urbancode" pattern="${lib.dir}/[artifact].[ext]"/>
     </target>
 
     <!-- =================================================== -->
