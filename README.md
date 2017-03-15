@@ -79,6 +79,9 @@ node {
 ```
 
 ## Release Notes
+### Version 2.3
+Fixed APAR PI77548 - Component process properties failing to resolve on deployment.
+
 ### Version 2.2
 Fixed RFE 98375 - Jenkins Plugin only allows Global credentials instead of job-based credentials.
 
