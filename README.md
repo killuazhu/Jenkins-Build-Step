@@ -1,10 +1,7 @@
-# Jenkins-Build-Step
-A plugin for Jenkins automation server to communicate with IBM UrbanCode Deploy
+# Overview
+This is the [IBM UrbanCode Deploy](https://developer.ibm.com/urbancode/products/urbancode-deploy/) plugin for Jenkins Pipeline (Jenkins 2.0). This plugin is also referred to as the Build Steps plugin since you are able to interact with UrbanCode Deploy via a job step in Jenkins versus a post-processing action. The plugin allows you to upload component versions, create snapshots, and run processes among other things.
 
-## Installation
-The plugin can be downloaded at the [IBM UrbanCode Plugins website](https://developer.ibm.com/urbancode/plugin/jenkins-2-0/ "Plugin Distributable")
-
-Full instructions can be found in the [Jenkins Build Step plugin documentation](https://developer.ibm.com/urbancode/docs/jenkins-build-step-integration-with-ibm-urbancode-deploy/ "Plugin Documentation")
+More information about this plugin is available [here](https://developer.ibm.com/urbancode/plugin/jenkins-2-0/) and [here](https://developer.ibm.com/urbancode/plugindoc/ibmucd/jenkins-pipeline-formerly-jenkins-2-0/).
 
 ## Pipeline Examples
 ### Create Component Version
@@ -80,3 +77,25 @@ node {
     ])
 }
 ```
+
+## Release Notes
+### Version 2.4
+Fixed APAR PI85407 - Component version import passes a blank Properties object.
+
+### Version 2.3
+Fixed APAR PI77548 - Component process properties failing to resolve on deployment.
+
+### Version 2.2
+Fixed RFE 98375 - Jenkins Plugin only allows Global credentials instead of job-based credentials.
+
+Fixed PI75045 - UCD server maintenance mode check requires admin privileges.
+
+### Version 2.1
+Fixed PI61971 - Connection pool leak in Jenkins ibm-ucdeploy-build-steps.
+
+### Older Versions
+Fixed PI32899 - Jenkins plugin fails on slave nodes with an UnserializbleException
+
+Fixed PI36005 - Jenkins plugin 1.2.1 not compatible with builds created with earlier versions of the plugin
+
+Fixed PI37957 - Pulled in a fix for excludes options not being handled by a common library.

@@ -1,0 +1,276 @@
+<project name="jenkins-pipeline-ud-plugin" default="dist" xmlns:codestation="antlib:com.urbancode.codestation2.client" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+    <defaultexcludes add="**/.ahs.dig" />
+    <defaultexcludes add="**/.ahs.manifest" />
+    <defaultexcludes add="**/*.bom" />
+    <defaultexcludes add="**/.git*" />
+    <defaultexcludes add="**/.mailmap" />
+
+    <property environment="env"/>
+
+    <!-- ==================================================================
+         PROJECT CONFIGURATION
+         ================================================================== -->
+    <property name="project" value="${ant.project.name}"/>
+    <property name="ahp.branch.name" value="master"/>
+    <property name="ahp.project.name" value="${project}"/>
+    <property name="ahp.workflow.name" value="build workflow [${ahp.branch.name}]"/>
+
+    <condition property="build.life.id" value="${env.AH_BUILD_LIFE_ID}">
+        <isset property="env.AH_BUILD_LIFE_ID" />
+    </condition>
+    <condition property="plugin.version" value="${build.life.id}" else="dev">
+        <isset property="build.life.id" />
+    </condition>
+
+    <property name="MAVEN_HOME" value="${env.MAVEN_HOME}"/>
+
+    <!-- ==================================================================
+         ENVIRONMENTAL DETECTION
+         ================================================================== -->
+    <!-- <condition property="git" value="git.cmd">
+        <os family="windows" />
+    </condition>
+    <condition property="git" value="git">
+        <not>
+            <os family="windows" />
+        </not>
+    </condition> -->
+     <property name="git" value="git"/>
+
+    <condition property="mvn" value="${MAVEN_HOME}/bin/mvn.cmd">
+        <os family="windows" />
+    </condition>
+    <condition property="mvn" value="${MAVEN_HOME}/bin/mvn">
+        <not>
+            <os family="windows" />
+        </not>
+    </condition>
+
+    <!-- ==================================================================
+         LOCATIONS OF PROJECT ELEMENTS
+         ================================================================== -->
+    <property name="build.dir" location="work" />
+
+    <property name="src.dir" location="src" />
+    <property name="src.main.java.dir" location="${src.dir}/main/java" />
+
+    <property name="lib.dir" location="lib" />
+    <property name="lib.build.dir" location="${lib.dir}/build" />
+    <property name="lib.test.dir" location="${lib.dir}/test" />
+
+    <!-- ==================================================================
+         LOCATIONS OF BUILD ARTIFACTS
+         ================================================================== -->
+    <property name="dist.dir" location="dist" />
+    <property name="target.dir" location="target" />
+
+    <!-- ==================================================================
+         TASK DEFAULTS
+         ================================================================== -->
+    <presetdef name="exec">
+      <exec failifexecutionfails="true"
+            failonerror="true"
+            logError="true"/>
+    </presetdef>
+
+    <!-- ==================================================================
+         PATHS
+         ================================================================== -->
+    <path id="classpath.main">
+        <fileset dir="${lib.dir}">
+            <include name="*.jar" />
+        </fileset>
+    </path>
+
+    <!-- ===================================================================
+         STANDARD TARGETS
+         =================================================================== -->
+    <target name="jar" depends="jar-main"/>
+    <target name="dist" depends="dist-main"/>
+
+    <!-- ==================================================================
+         ARTIFACT HANDLING
+         ================================================================== -->
+    <target name="resolve"
+    	unless="resolve.no"
+    	description="Resolve all dependencies"
+    	depends="resolve-ivy, resolve-codestation">
+    </target>
+
+	<target name="resolve-codestation" if="build.life.id"
+            description="Resolve all codestation dependencies">
+            <mkdir dir="${lib.dir}"/>
+        <codestation:resolve
+            buildLife="${build.life.id}"
+            xmlFile="dependencies.xml" />
+    </target>
+
+    <target name="resolve-ivy" depends="install-ivy" unless="build.life.id" description="Resolve all ivy dependencies">
+        <ivy:settings file="ivysettings.xml"/>
+        <mkdir dir="${lib.dir}"/>
+        <mkdir dir="${lib.build.dir}"/>
+        <mkdir dir="${lib.test.dir}"/>
+        <ivy:retrieve conf="default" pattern="${lib.dir}/[artifact]-[revision](-[classifier]).[ext]"/>
+        <ivy:retrieve conf="urbancode" pattern="${lib.dir}/[artifact].[ext]"/>
+        <ivy:retrieve conf="build" pattern="${lib.dir}/[conf]/[artifact]-[revision](-[classifier]).[ext]"/>
+        <ivy:retrieve conf="test" pattern="${lib.dir}/[conf]/[artifact]-[revision](-[classifier]).[ext]"/>
+    </target>
+
+    <!-- =================================================== -->
+    <!-- INSTALL IVY TARGET                                  -->
+    <!-- =================================================== -->
+    <available classname="org.apache.ivy.Main" property="ivy.installed"/>
+    <target name="install-ivy" depends="-install, -fail"></target>
+
+    <target name="-install" description="Install ivy" unless="ivy.installed">
+        <!-- Installation -->
+        <property name="antHome" value="${user.home}${file.separator}.ant"/>
+        <mkdir dir="${antHome}${file.separator}lib"/>
+        <get dest="${antHome}${file.separator}lib${file.separator}ivy.jar" src="http://search.maven.org/remotecontent?filepath=org/apache/ivy/ivy/2.3.0/ivy-2.3.0.jar"/>
+        <echo message="SUCCESS! Ivy has been installed in ${antHome}." />
+
+        <!-- Determine whether to continue or fail -->
+        <property name="failIvy" value="true"/>
+        <condition property="do.fail">
+            <equals arg1="${failIvy}" arg2="true" />
+        </condition>
+    </target>
+
+    <!-- Default to fail if Ivy installed, unless -DfailIvy=false : Used for .travis -->
+    <target name="-fail" if="do.fail">
+        <fail message="Please run the build again.${line.separator}Note: If you get this message more than once, trying specify your Ant's home directory with the flag: ant -DantHome='ant/home/directory/here' or set/export the `ANT_HOME` environment variable." />
+    </target>
+
+    <target name="publish" if="buildlife.exists" depends="dist" unless="publish.no"
+            description="Publish artifacts to local codestation repository">
+        <codestation:publish
+            project="${ahp.project.name}"
+            workflow="${ahp.workflow.name}"
+            publishall="true"/>
+    </target>
+
+    <!-- ==================================================================
+         COMPILE
+         ================================================================== -->
+    <target name="prepare" depends="resolve">
+        <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/uDeployRestClient.jar"/>
+          <arg value="-DgroupId=uc-uDeployRestClient"/>
+          <arg value="-DartifactId=uc-uDeployRestClient"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/CommonsUtil.jar"/>
+          <arg value="-DgroupId=uc-commons-util"/>
+          <arg value="-DartifactId=uc-commons-util"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/CommonsFileUtils.jar"/>
+          <arg value="-DgroupId=uc-commons-fileutils"/>
+          <arg value="-DartifactId=uc-commons-fileutils"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/HttpComponents-Util.jar"/>
+          <arg value="-DgroupId=uc-httpcomponents-util"/>
+          <arg value="-DartifactId=uc-httpcomponents-util"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/jersey-core-1.12.jar"/>
+          <arg value="-DgroupId=uc-jersey-core"/>
+          <arg value="-DartifactId=uc-jersey-core"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/jersey-client-1.12.jar"/>
+          <arg value="-DgroupId=uc-jersey-client"/>
+          <arg value="-DartifactId=uc-jersey-client"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/jsr311-api-1.1.1.jar"/>
+          <arg value="-DgroupId=uc-jsr311-api"/>
+          <arg value="-DartifactId=uc-jsr311-api"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+        <exec executable="${mvn}">
+          <arg value="--batch-mode"/>
+          <arg value="install:install-file"/>
+          <arg value="-Dfile=lib/jettison-1.1.jar"/>
+          <arg value="-DgroupId=uc-jettison"/>
+          <arg value="-DartifactId=uc-jettison"/>
+          <arg value="-Dversion=1.0-SNAPSHOT"/>
+          <arg value="-Dpackaging=jar"/>
+          <arg value="-DgeneratePom=true"/>
+        </exec>
+    </target>
+
+    <!-- ==================================================================
+         JAR
+         ================================================================== -->
+    <target name="jar-main" depends="prepare, set-version-property">
+        <exec executable="${mvn}">
+          <arg value="package"/>
+          <arg value="-Denv.buildLife=${plugin.version}"/>
+        </exec>
+    </target>
+
+
+    <!-- ==================================================================
+         DIST
+         ================================================================== -->
+    <target name="dist-main" depends="jar-main"/>
+
+    <!-- ==================================================================
+         OTHER
+         ================================================================== -->
+    <target name="clean">
+        <delete dir="${dist.dir}" />
+        <delete dir="${target.dir}" />
+        <delete dir="${build.dir}" />
+    </target>
+
+    <target name="clean-all" depends="clean">
+        <delete dir="${lib.dir}" />
+    </target>
+
+    <target name="set-version-property" unless="version">
+        <exec executable="${git}" outputproperty="version">
+            <arg value="rev-parse"/>
+            <arg value="--verify"/>
+            <arg value="--short=12"/>
+            <arg value="HEAD"/>
+        </exec>
+    </target>
+</project>

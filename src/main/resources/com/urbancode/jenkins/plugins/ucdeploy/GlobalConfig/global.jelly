@@ -1,0 +1,39 @@
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+  <j:set var="helpURL" value="/plugin/ibm-ucdeploy-build-steps"/>
+
+
+  <f:section title="IBM UrbanCode Deploy Pipeline Plugin Configuration">
+    <f:entry title="UCD Servers">
+      <f:repeatable name="sites" var="site" items="${descriptor.sites}">
+        <table width="100%">
+          <f:entry title="Profile Name" help="${helpURL}/global/profile.html">
+            <f:textbox name="profileName" value="${site.profileName}"/>
+          </f:entry>
+          <f:entry title="IBM UrbanCode Deploy URL" help="${helpURL}/global/url.html">
+            <f:textbox name="url" value="${site.url}"/>
+          </f:entry>
+          <f:entry title="User Name" help="${helpURL}/global/user.html">
+            <f:textbox name="user" value="${site.user}"/>
+          </f:entry>
+          <f:entry title="Password" help="${helpURL}/global/password.html">
+            <f:password name="password" value="${site.password}"/>
+          </f:entry>
+          <f:entry title="Administrative User" field="adminUser" help="${helpURL}/admin-user.html">
+            <f:checkbox name="adminUser" checked="${site.adminUser}"/>
+          </f:entry>
+          <f:entry title="Trust All Certificates" help="${helpURL}/global/trust.html">
+            <f:checkbox name="trustAllCerts" checked="${site.trustAllCerts}"/>
+          </f:entry>
+          <f:entry title="">
+            <div style="text-align: right">
+              <f:repeatableDeleteButton/>
+              <f:validateButton
+                  title="${%Test Connection}" progress="${%Testing...}"
+                  method="testConnection" with="url,user,password,trustAllCerts"/>
+            </div>
+          </f:entry>
+        </table>
+      </f:repeatable>
+    </f:entry>
+  </f:section>
+</j:jelly>
