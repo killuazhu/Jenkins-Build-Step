@@ -79,6 +79,9 @@ node {
 ```
 
 ## Release Notes
+### Version 2.4
+Fixed APAR PI85407 - Component version import passes a blank Properties object.
+
 ### Version 2.3
 Fixed APAR PI77548 - Component process properties failing to resolve on deployment.
 
